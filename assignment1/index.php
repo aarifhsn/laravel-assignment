@@ -32,8 +32,6 @@ echo "<br />";
 // echo "Min Abs Value: " . min($absValue) . "<br />";
 
 
-
-
 // Problem 2:
 // Given a few paragraphs in a file, read the file and count how many words are there. 
 
@@ -68,7 +66,6 @@ echo "<br />";
 
 //using PHP built-in function
 // str_word_count($str)
-
 
 
 
@@ -136,7 +133,6 @@ echo "<br />";
 //using PHP built-in function
 // $string = 'I LOVE PROGRAMMING';
 // strrev(implode(' ', array_reverse(explode(' ', $string))));
-
 
 
 
