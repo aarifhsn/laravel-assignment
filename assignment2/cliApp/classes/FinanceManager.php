@@ -1,5 +1,8 @@
 <?php
 
+
+namespace cliApp\classes;
+
 class FinanceManager
 {
     private $incomes = [];

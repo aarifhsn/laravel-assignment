@@ -1,4 +1,7 @@
 <?php
+
+namespace cliApp\classes;
+
 require_once "Transaction.php";
 class Expense extends Transaction
 {

@@ -1,5 +1,7 @@
 <?php
 
+namespace cliApp\classes;
+
 class Category
 {
     private $categories = [];

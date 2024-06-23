@@ -1,5 +1,7 @@
 <?php
 
+namespace cliApp\classes;
+
 class Transaction
 {
     public $amount;
