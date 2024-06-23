@@ -17,13 +17,27 @@ function getUserInput($prompt)
 $categoryManager = new Category('data/categories.json');
 $financeManager = new FinanceManager($categoryManager);
 
+
+//(float)getUserInput("Enter income amount: ");
+// validate amount input when its less then zero or empty
+function validAmount()
+{
+    do {
+        $amount = (float)getUserInput("Enter income amount: ");
+        if ($amount <= 0 || empty($amount)) {
+            echo "PLease enter a valid amount.\n";
+        }
+    } while ($amount <= 0);
+    return $amount;
+}
+
 while (true) {
     echo "\n1. Add income\n2. Add expense\n3. View incomes\n4. View expenses\n5. View savings\n6. View categories\n7. Exit\n\nEnter your option: ";
     $option = getUserInput("");
 
     switch ($option) {
         case 1:
-            $amount = (float)getUserInput("Enter income amount: ");
+            $amount = validAmount();
             $category = getUserInput("Enter income category: ");
             $categoryManager->addCategory($category);
             $financeManager->addIncome(new Income($amount, $category));
