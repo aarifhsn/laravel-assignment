@@ -14,7 +14,7 @@ class FinanceManager
     public function __construct($categoryManager)
     {
         $this->categoryManager = $categoryManager;
-        $this->ensureDataDirectoryExists();
+        $this->dataDirectory();
         $this->load();
     }
 
@@ -47,7 +47,7 @@ class FinanceManager
         return $totalIncome - $totalExpense;
     }
 
-    private function ensureDataDirectoryExists()
+    private function dataDirectory()
     {
         if (!is_dir('data')) {
             mkdir('data', 0777, true);
