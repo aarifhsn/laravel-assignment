@@ -23,7 +23,7 @@ $financeManager = new FinanceManager($categoryManager);
 function validAmount()
 {
     do {
-        $amount = (float)getUserInput("Enter income amount: ");
+        $amount = (float)getUserInput("Enter amount: ");
         if ($amount <= 0 || empty($amount)) {
             echo "PLease enter a valid amount.\n";
         }
@@ -45,7 +45,7 @@ while (true) {
             break;
 
         case 2:
-            $amount = (float)getUserInput("Enter expense amount: ");
+            $amount = validAmount();
             $category = getUserInput("Enter expense category: ");
             $categoryManager->addCategory($category);
             $financeManager->addExpense(new Expense($amount, $category));
