@@ -1,6 +1,5 @@
 <?php
 
-//require_once 'classes/Transaction.php';
 require_once 'classes/Income.php';
 require_once 'classes/Expense.php';
 require_once 'classes/Category.php';
@@ -10,7 +9,6 @@ use  cliApp\classes\Income;
 use  cliApp\classes\Expense;
 use  cliApp\classes\Category;
 use  cliApp\classes\FinanceManager;
-use  cliApp\classes\Transaction;
 
 // Function to get user input
 function getUserInput($prompt)
