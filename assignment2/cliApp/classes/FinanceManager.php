@@ -57,16 +57,43 @@ class FinanceManager
     private function load()
     {
         if (file_exists($this->incomeFile)) {
-            $this->incomes = array_map(fn ($data) => new Income($data['amount'], $data['category']), json_decode(file_get_contents($this->incomeFile), true) ?? []);
+            // Read the file contents and decode the JSON data into an array
+            $incomeData = json_decode(file_get_contents($this->incomeFile), true) ?? [];
+
+            // Map the data to Income objects
+            $this->incomes = array_map(
+                fn ($data) => new Income($data['amount'], $data['category']),
+                $incomeData
+            );
         }
         if (file_exists($this->expenseFile)) {
-            $this->expenses = array_map(fn ($data) => new Expense($data['amount'], $data['category']), json_decode(file_get_contents($this->expenseFile), true) ?? []);
+            // Read the file contents and decode the JSON data into an array
+            $expenseData = json_decode(file_get_contents($this->expenseFile), true) ?? [];
+
+            // Map the data to Expense objects
+            $this->expenses = array_map(
+                fn ($data) => new Expense($data['amount'], $data['category']),
+                $expenseData
+            );
         }
     }
 
     private function save()
     {
-        file_put_contents($this->incomeFile, json_encode(array_map(fn ($income) => get_object_vars($income), $this->incomes)));
-        file_put_contents($this->expenseFile, json_encode(array_map(fn ($expense) => get_object_vars($expense), $this->expenses)));
+        // Save the incomes to the income file
+        file_put_contents(
+            $this->incomeFile,
+            json_encode(
+                array_map(fn ($income) => get_object_vars($income), $this->incomes)
+            )
+        );
+
+        // Save the expenses to the expense file
+        file_put_contents(
+            $this->expenseFile,
+            json_encode(
+                array_map(fn ($expense) => get_object_vars($expense), $this->expenses)
+            )
+        );
     }
 }

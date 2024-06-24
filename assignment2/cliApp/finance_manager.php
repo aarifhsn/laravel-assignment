@@ -23,8 +23,6 @@ function getUserInput($prompt)
 $categoryManager = new Category('data/categories.json');
 $financeManager = new FinanceManager($categoryManager);
 
-
-//(float)getUserInput("Enter income amount: ");
 // validate amount input when its less then zero or empty
 function validAmount()
 {
