@@ -1,50 +1,75 @@
 <?php
 
+require_once 'FileManager.php';
+
 class User
 {
     private $users = [];
-    public $userFiles = 'data/Users.json';
+    private $userFile = 'data/users.json';
+    private $fileManager;
 
     public function __construct()
     {
-        $this->users = json_decode(file_get_contents($this->userFiles), true);
+        $this->fileManager = new FileManager($this->userFile);
+        $this->users = $this->fileManager->read();
+        session_start();
     }
-    public function userExists($username)
+
+    public function userExist($email)
     {
-        // check if user exists
         foreach ($this->users as $user) {
-            if ($user['username'] === $username) {
+            if ($user['email'] === $email) {
                 return true;
             }
         }
         return false;
     }
-    public function register($username, $password, $email)
+
+    public function register($name, $email, $password)
     {
-        if ($this->userExists($username)) {
-            return false;
-        } else {
-            $this->users[] = [
-                'username' => $username,
+        if (!$this->userExist($name)) {
+            $newUser = [
+                'name' => $name,
+                'email' => $email,
                 'password' => password_hash($password, PASSWORD_DEFAULT),
-                'email' => $email
             ];
+            $this->users[] = $newUser;
+            $this->fileManager->write($this->users);
             return true;
         }
-    }
-}
-
-class UserManagement
-{
-    public function __construct()
-    {
-        $this->userDirectory();
+        return false;
     }
 
-    private function userDirectory()
+    private function getAllUsers()
     {
-        if (!is_dir('data')) {
-            mkdir('data', 0777, true);
+        $jsonData = file_get_contents($this->userFile);
+        return json_decode($jsonData, true);
+    }
+    public function login($email, $password)
+    {
+        $users = $this->getAllUsers();
+        foreach ($users as $user) {
+            if ($user['email'] === $email && password_verify($password, $user['password'])) {
+                $_SESSION['logged_in'] = true;
+                $_SESSION['email'] = $email;
+                $_SESSION['name'] = $user['name']; // Store user's name in session
+                return true;
+            }
         }
+        return false;
+    }
+    public function getUserName()
+    {
+        return $_SESSION['name'] ?? 'Guest';
+    }
+
+    public function isLoggedIn()
+    {
+        return isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true;
+    }
+
+    public function logout()
+    {
+        session_destroy();
     }
 }

@@ -1,34 +1,66 @@
 <?php
-
-
 require_once 'classes/User.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = $_POST['name'];
-    $email = $_POST['email'];
-    $password = $_POST['password'];
-    $confirm_password = $_POST['confirm_password'];
+$error = [];
+$name = $email = $password = '';
 
-    if ($password !== $confirm_password) {
-        echo 'Passoword doesn\'t match';
-        exit;
-    }
-
-    $user = new User();
-    if ($user->userExists($username)) {
-        echo 'User already exist';
-    }
-
-    if ($user->register($username, $password, $email)) {
-        header('Location: login.php');
-        exit;
-    } else {
-        echo 'User already exists';
-    }
+function sanitize($data)
+{
+    return htmlspecialchars(stripslashes(trim($data)));
 }
 
-?>
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // validate name
+    if (empty($_POST['name'])) {
+        $error['name'] = 'Name is required';
+    } else {
+        $name = sanitize($_POST['name']);
+    }
 
+    // validate email
+    if (empty($_POST['email'])) {
+        $error['email'] = 'Email is required';
+    } else {
+        $email = sanitize($_POST['email']);
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $error['email'] = 'Email is invalid';
+        }
+    }
+
+    // validate password
+    if (empty($_POST['password'])) {
+        $error['password'] = 'Password is required';
+    } elseif (strlen($_POST['password']) < 8) {
+        $error['password'] = 'Password must be at least 8 characters';
+    } else {
+        $password = sanitize($_POST['password']);
+    }
+
+    // validate confirm password
+    if (empty($_POST['confirm_password'])) {
+        $error['confirm_password'] = 'Confirm password is required';
+    } else {
+        $confirm_password = sanitize($_POST['confirm_password']);
+        if ($password !== $confirm_password) {
+            $error['confirm_password'] = 'Passwords do not match';
+        }
+    }
+
+    if (empty($error)) {
+        $user = new User();
+        if ($user->userExist($email)) {
+            $error['general'] = 'Email already exist. Please ' . '<a class="text-black" href="login.php">Log In</a>';
+        } else if ($user->register($name, $email, $password)) {
+            $message = 'Registration successful, please login';
+            $encodeMessage = urlencode($message);
+            header("Location: login.php?encodedMessage=$encodeMessage");
+            exit;
+        } else {
+            $error['general'] = 'Registration failed';
+        }
+    }
+}
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -102,10 +134,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                         <div class="mt-10 mx-auto w-full max-w-xl">
                             <form class="space-y-6" action="#" method="POST">
+                                <?php if (isset($error['general'])) : ?>
+                                    <p class="err_message text-red-500 text-sm text-center font-bold">
+                                        <?php echo $error['general']; ?>
+                                    </p>
+                                <?php endif; ?>
                                 <div>
                                     <label for="name" class="block text-sm font-medium leading-6 text-gray-900">Name</label>
                                     <div class="mt-2">
                                         <input id="name" name="name" type="text" required class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                                        <p class="err_message text-red-500 text-xs">
+                                            <?php if (isset($error['name'])) {
+                                                echo $error['name'];
+                                            } ?>
+                                        </p>
                                     </div>
                                 </div>
 
@@ -113,6 +155,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <label for="email" class="block text-sm font-medium leading-6 text-gray-900">Email address</label>
                                     <div class="mt-2">
                                         <input id="email" name="email" type="email" autocomplete="email" required class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                                        <p class="err_message text-red-500 text-xs">
+                                            <?php if (isset($error['email'])) {
+                                                echo $error['email'];
+                                            } ?>
+                                        </p>
                                     </div>
                                 </div>
 
@@ -122,6 +169,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     </div>
                                     <div class="mt-2">
                                         <input id="password" name="password" type="password" autocomplete="current-password" required class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                                        <p class="err_message text-red-500 text-xs">
+                                            <?php if (isset($error['password'])) {
+                                                echo $error['password'];
+                                            } ?>
+                                        </p>
                                     </div>
                                 </div>
 
@@ -131,12 +183,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     </div>
                                     <div class="mt-2">
                                         <input id="confirm_password" name="confirm_password" type="password" required class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                                        <p class="err_message text-red-500 text-xs">
+                                            <?php if (isset($error['confirm_password'])) {
+                                                echo $error['confirm_password'];
+                                            } ?>
+                                        </p>
                                     </div>
                                 </div>
 
                                 <div>
                                     <button type="submit" class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Register</button>
                                 </div>
+
                             </form>
 
                             <p class="mt-10 text-center text-sm text-gray-500">
