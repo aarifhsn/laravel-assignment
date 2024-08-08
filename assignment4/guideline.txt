@@ -1,7 +1,12 @@
-I have a question regarding assignment-4 to @Ahmed Shamim Hasan Shaon  bhai. If a customer(user) deposits, withdraws or transfers money, should his own deposits and withdraws with his name and email be shown when he’s logged in? For example, If I’m a Customer and I deposited 500$ and withdrew 200$, should there be 2 rows that shows my name(receiver) and email that I’ve deposited 500$ and withdrew 200$ from my own account when I’m logged in as an authenticated user/customer?
+1. I have a question regarding assignment-4 to @Ahmed Shamim Hasan Shaon  bhai. If a customer(user) deposits, withdraws or transfers money, should his own deposits and withdraws with his name and email be shown when he’s logged in? For example, If I’m a Customer and I deposited 500$ and withdrew 200$, should there be 2 rows that shows my name(receiver) and email that I’ve deposited 500$ and withdrew 200$ from my own account when I’m logged in as an authenticated user/customer?
 Sat 11:53 AM
 Ahmed Shamim Hasan replied to Saif
 Ahmed Shamim Hasan Shaon
 Yes, the customer should see his/her own transaction history. 
 
 It might seem that showing his/her own name/email is redundant in the transaction history, but the transactions won’t be always to his/her account. Sometimes it’d be done to someone else. So, it’s better to keep the format same for all types of transactions and show the ‘receiver’ and ‘sender’ name in all transactions.
+
+
+2. Assignment - 04 এ শুধু কাস্টোমারের লগিন ও রেজিস্টেশন এর কথা বলা হইছে এবং কোড দেওয়া হইছে। এডমিন এর লগিন ও রেজিস্ট্রেশন কীভাবে করতে হবে?
+ Reply - Admin ক্রিয়েট করবেন CLI script দিয়ে, আর লগইন তো একই লগইন পেইজ দিয়েই হবে।
+
