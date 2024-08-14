@@ -1,0 +1,37 @@
+[
+  {
+    "id": "66bb8c154b1be",
+    "name": "MD ARIF HASSAN",
+    "email": "aarifhsn@gmail.com",
+    "password": "$2y$10$WvGLQ9g3KXYGEgAar/7mveBK.QCZe0ewV1eihtGhvD7Y3ozJurKgy",
+    "balance": 2800
+  },
+  {
+    "name": "Marfi Ahmed",
+    "email": "marfi@gmail.com",
+    "balance": 2000
+  },
+  {
+    "name": "marfi ahmed",
+    "email": "marfiahmed@gmail.com",
+    "password": "$2y$10$7yp8x3f5ZnLAT6mNSrSd8.vjMfcf2HNVEJe6lzoc7PDzZNb1VECKS",
+    "role": "admin",
+    "created_at": "2024-08-13 18:58:44",
+    "balance": 500
+  },
+  {
+    "id": "66bb9196ee375",
+    "fname": "Driscoll",
+    "lname": "Valdez",
+    "email": "qepy@mailinator.com",
+    "password": "$2y$10$OzL10C4tQhRHktppJhR10ugoCz1tzVhiauCV9sQMrd6dJKDjG/zOK",
+    "balance": 0
+  },
+  {
+    "id": "66bc334d68a81",
+    "name": "fawad alam",
+    "email": "fawadalam@gmail.com",
+    "password": "$2y$10$mcmIn/RC4P6NOHgocH8jLOafAVxYuGQz.KXjV2jxsuaCmurH5j31m",
+    "balance": 0
+  }
+]
