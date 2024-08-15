@@ -16,7 +16,7 @@ class ComposerStaticInit9eab0c456d7653f01ec2af42ff37d3a2
     public static $prefixDirsPsr4 = array (
         'Bangubank\\' => 
         array (
-            0 => __DIR__ . '/../..' . '/includes',
+            0 => __DIR__ . '/../..' . '/src',
         ),
     );
 

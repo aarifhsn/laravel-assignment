@@ -8,7 +8,7 @@ date_default_timezone_set('Asia/Dhaka');
 
 class AccountManagement
 {
-    private $transactionLogPath = __DIR__ . '/../includes/transactions.json';
+    private $transactionLogPath = __DIR__ . '/../src/transactions.json';
     private $user;
 
     public function __construct(User $user)

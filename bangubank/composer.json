@@ -4,9 +4,7 @@
   "type": "project",
   "autoload": {
     "psr-4": {
-      "Bangubank\\": "includes/",
-      "Bangubank\\Admin\\": "admin/",
-      "Bangubank\\Customer\\": "customer/"
+      "Bangubank\\": "src/"
     }
   },
   "authors": [
