@@ -1,0 +1,17 @@
+{
+  "name": "arifhassan/bangubank",
+  "description": "A banking app to facilitate customer and administrator",
+  "type": "project",
+  "autoload": {
+    "psr-4": {
+      "Bangubank\\": "app/"
+    }
+  },
+  "authors": [
+    {
+      "name": "Arif Hassan",
+      "email": "aarifhsn@gmail.com"
+    }
+  ],
+  "require": {}
+}
