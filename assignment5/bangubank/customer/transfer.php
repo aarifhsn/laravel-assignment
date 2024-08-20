@@ -4,17 +4,18 @@ namespace Bangubank\Customer;
 
 require __DIR__ . '/../vendor/autoload.php';
 
-use Bangubank\User;
-use Bangubank\AccountManagement;
-
-session_start();
+use Bangubank\Models\User;
+use Bangubank\Models\AccountManagement;
+use Bangubank\Models\BalanceManager;
 
 $user = new User();
 // Set the path to the users.json file
-$user->filePath = __DIR__ . '/../users.json';
+$user->filePath = __DIR__ . '/../storage/users.json';
 
 $accountManagement = new AccountManagement($user);
+$balanceManager = new BalanceManager($user);
 
+// Check if the user is logged in
 if ($user->isLoggedIn()) {
   $email = $_SESSION['email'];
 } else {
@@ -25,25 +26,32 @@ if ($user->isLoggedIn()) {
 $message = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  $receiver_name = $user->getName();
-  $email = $user->getEmail();
+  $receiver_name = $_POST['receiver_name'] ?? '';
+  $email = $_POST['email'];
   $amount = $_POST['amount'];
 
+  // Log the email and amount for debugging
+  error_log("Received transfer request: Email = $email, Amount = $amount");
+
   // Validate the amount
-  if (is_numeric($amount) && $amount > 0) {
+  if (filter_var($email, FILTER_VALIDATE_EMAIL) && is_numeric($amount) && $amount > 0) {
     $amount = (float)$amount;
 
-    // Attempt to withdraw the amount
-    if ($accountManagement->withdraw($receiver_name, $email, $amount)) {
-      $message = "Withdraw Successful. New Balance: $" . $accountManagement->getBalance();
+    if ($balanceManager->getBalance() < $amount) {
+      $message = "Insufficient Balance";
     } else {
-      $message = "Failed to withdraw. Please check your balance or try again.";
+
+      if ($accountManagement->transfer($receiver_name, $email, $amount,)) {
+        $message = "transfer Successful. New Balance: $" . $balanceManager->getBalance();
+      } else {
+        error_log('transfer failed in AccountManagement::transfer'); // Debugging statement
+        $message = "Failed to transfer. Please try again.";
+      }
     }
   } else {
-    $message = "Invalid amount";
+    $message = "Invalid email or amount";
   }
 }
-
 
 ?>
 
@@ -72,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
   </style>
 
-  <title>Withdraw Balance</title>
+  <title>Transfer Balance</title>
 </head>
 
 <body class="h-full">
@@ -88,8 +96,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                   <!-- Current: "bg-emerald-700 text-white", Default: "text-white hover:bg-emerald-500 hover:bg-opacity-75" -->
                   <a href="./dashboard.php" class="text-white hover:bg-emerald-500 hover:bg-opacity-75 rounded-md py-2 px-3 text-sm font-medium" aria-current="page">Dashboard</a>
                   <a href="./deposit.php" class="text-white hover:bg-emerald-500 hover:bg-opacity-75 rounded-md py-2 px-3 text-sm font-medium">Deposit</a>
-                  <a href="./withdraw.php" class="bg-emerald-700 text-white rounded-md py-2 px-3 text-sm font-medium">Withdraw</a>
-                  <a href="./transfer.php" class="text-white hover:bg-emerald-500 hover:bg-opacity-75 rounded-md py-2 px-3 text-sm font-medium">Transfer</a>
+                  <a href="./withdraw.php" class="text-white hover:bg-emerald-500 hover:bg-opacity-75 rounded-md py-2 px-3 text-sm font-medium">Withdraw</a>
+                  <a href="./transfer.php" class="bg-emerald-700 text-white rounded-md py-2 px-3 text-sm font-medium">Transfer</a>
                 </div>
               </div>
             </div>
@@ -140,9 +148,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <a href="./deposit.php" class="text-white hover:bg-emerald-500 hover:bg-opacity-75 block rounded-md py-2 px-3 text-base font-medium">Deposit</a>
 
-            <a href="./withdraw.php" class="bg-emerald-700 text-white block rounded-md py-2 px-3 text-base font-medium">Withdraw</a>
+            <a href="./withdraw.php" class="text-white hover:bg-emerald-500 hover:bg-opacity-75 block rounded-md py-2 px-3 text-base font-medium">Withdraw</a>
 
-            <a href="./transfer.php" class="text-white hover:bg-emerald-500 hover:bg-opacity-75 block rounded-md py-2 px-3 text-base font-medium">Transfer</a>
+            <a href="./transfer.php" class="bg-emerald-700 text-white block rounded-md py-2 px-3 text-base font-medium">Transfer</a>
           </div>
           <div class="border-t border-emerald-700 pb-3 pt-4">
             <div class="flex items-center px-5">
@@ -179,7 +187,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <header class="py-10">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <h1 class="text-3xl font-bold tracking-tight text-white">
-            Withdaw Balance
+            Transfer Balance
           </h1>
         </div>
       </header>
@@ -195,44 +203,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 Current Balance
               </dt>
               <dd class="w-full flex-none text-3xl font-medium leading-10 tracking-tight text-gray-900">
-                <?php echo '$' . $accountManagement->getBalance(); ?>
+                <?php echo '$' . $balanceManager->getBalance(); ?>
               </dd>
             </div>
           </dl>
 
           <hr />
-          <!-- Withdaw Form -->
+          <!-- Transfer Form -->
           <div class="sm:rounded-lg">
             <div class="px-4 py-5 sm:p-6">
-              <h3 class="text-lg font-semibold leading-6 text-gray-800">
-                Withdaw Money From Your Account
-              </h3>
               <?php if ($message) : ?>
                 <div class="mt-2 text-sm text-green-500"><?php echo $message; ?></div>
               <?php endif; ?>
-              <div class="mt-4 text-sm text-gray-500">
-                <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="POST">
-                  <!-- Input Field -->
-                  <div class="relative mt-2 rounded-md">
-                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-0">
-                      <span class="text-gray-400 sm:text-4xl">$</span>
-                    </div>
-                    <input type="number" name="amount" id="amount" class="block w-full ring-0 outline-none text-xl pl-4 py-2 sm:pl-8 text-gray-800 border-b border-b-emerald-500 placeholder:text-gray-400 sm:text-4xl" placeholder="0.00" required />
-                  </div>
+              <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="POST">
 
-                  <!-- Submit Button -->
-                  <div class="mt-5">
-                    <button type="submit" class="w-full px-6 py-3.5 text-base font-medium text-white bg-emerald-600 hover:bg-emerald-800 focus:ring-4 focus:outline-none focus:ring-emerald-300 rounded-lg sm:text-xl text-center">
-                      Proceed
-                    </button>
+                <!-- Recipient's Name Input -->
+                <input type="text" name="receiver_name" id="receiver_name" class="block w-full ring-0 outline-none py-2 text-gray-800 border-b placeholder:text-gray-400 md:text-4xl" placeholder="Recipient's Name (optional)" />
+
+                <!-- Recipient's Email Input -->
+                <div class="relative mt-4 md:mt-8">
+                  <input type="email" name="email" id="email" class="block w-full ring-0 outline-none py-2 text-gray-800 border-b placeholder:text-gray-400 md:text-4xl" placeholder="Recipient's Email Address" required />
+                </div>
+
+                <!-- Amount -->
+                <div class="relative mt-4 md:mt-8">
+                  <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-0">
+                    <span class="text-gray-400 md:text-4xl">$</span>
                   </div>
-                </form>
-              </div>
+                  <input type="number" name="amount" id="amount" class="block w-full ring-0 outline-none pl-4 py-2 md:pl-8 text-gray-800 border-b border-b-emerald-500 placeholder:text-gray-400 md:text-4xl" placeholder="0.00" required />
+                </div>
+
+                <!-- Submit Button -->
+                <div class="mt-5">
+                  <button type="submit" class="w-full px-6 py-3.5 text-base font-medium text-white bg-emerald-600 hover:bg-emerald-800 focus:ring-4 focus:outline-none focus:ring-emerald-300 rounded-lg md:text-xl text-center">
+                    Proceed
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </div>
       </div>
-    </main>
+  </div>
+  </main>
   </div>
 </body>
 

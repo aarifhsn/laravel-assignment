@@ -2,10 +2,10 @@
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-use Bangubank\AdminUser;
+use Bangubank\Models\AdminUser;
 
 // Define the path to the users.json file
-$filePath = __DIR__ . '/users.json';
+$filePath = __DIR__ . '/storage/users.json';
 
 // Create the User object
 $admin_user = new AdminUser($filePath);

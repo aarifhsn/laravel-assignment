@@ -1,9 +1,10 @@
 <?php
 
-namespace Bangubank;
+namespace Bangubank\Models;
 
 class BalanceManager
 {
+
     private $user;
 
     public function __construct(User $user)
@@ -14,10 +15,13 @@ class BalanceManager
     public function getBalance()
     {
         $user = $this->user->getLoggedInUser();
-        return $user ? $user['balance'] : 0;
+        if ($user) {
+            return $user['balance'];
+        }
+        return 0;
     }
 
-    public function updateBalance($receiver_name = '', $email, $amount)
+    public function updateBalance($receiver_name, $email, $amount)
     {
         $users = $this->user->getAllUsers();
         if ($users === null) {
@@ -35,6 +39,7 @@ class BalanceManager
         }
 
         if (!$userExists) {
+            // Create a new user entry if the recipient does not exist
             $users[] = [
                 'name' => $receiver_name,
                 'email' => $email,
@@ -43,6 +48,11 @@ class BalanceManager
             error_log("Created new user for email: $email with amount: $amount");
         }
 
-        return file_put_contents($this->user->filePath, json_encode($users, JSON_PRETTY_PRINT)) ? true : false;
+        if (file_put_contents($this->user->filePath, json_encode($users, JSON_PRETTY_PRINT))) {
+            return true;
+        } else {
+            error_log("Failed to update user balance in file");
+            return false;
+        }
     }
 }

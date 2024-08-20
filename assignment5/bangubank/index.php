@@ -1,15 +1,16 @@
 <?php
 
-require_once __DIR__ . '../vendor/autoload.php';
+// Enable error reporting for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
-use Bangubank\AdminUser;
-use Bangubank\UserManager;
+require_once __DIR__ . '/vendor/autoload.php';
 
-session_start(); // Start the session
+use Bangubank\Models\AdminUser;
+use Bangubank\Models\User;
 
-
-$user = new UserManager();
-$admin_user = new AdminUser(__DIR__ . '/users.json');
+$user = new User();
+$admin_user = new AdminUser(__DIR__ . '/storage/users.json');
 
 if ($user->isLoggedIn()) {
   header('Location: ' . ($_SESSION['role'] === 'admin' ? 'admin/customers.php' : 'customer/dashboard.php'));

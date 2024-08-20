@@ -1,6 +1,6 @@
 <?php
 
-namespace Bangubank;
+namespace Bangubank\Models;
 
 class AdminUser
 {
@@ -19,20 +19,14 @@ class AdminUser
         return [];
     }
 
-    public function getAdminUser($email)
-    {
-        $users = $this->getAllUsers();
-        foreach ($users as $user) {
-            if ($user['role'] === 'admin' && $user['email'] === $email) {
-                return $user;
-            }
-        }
-        return null;
-    }
 
     public function saveUsers($users)
     {
-        file_put_contents($this->filePath, json_encode($users, JSON_PRETTY_PRINT));
+        if (file_put_contents($this->filePath, json_encode($users, JSON_PRETTY_PRINT))) {
+            return true;
+        } else {
+            return false;
+        };
     }
 
     public function createAdmin($name, $email, $password)
@@ -59,9 +53,27 @@ class AdminUser
         $users[] = $admin;
         $this->saveUsers($users);
 
-        echo "Admin user created successfully.\n";
-        return true;
+        // Attempt to save the users and check if the save was successful
+        if ($this->saveUsers($users)) {
+            echo "Admin user created successfully.\n";
+            return true;
+        } else {
+            echo "Failed to create admin user. Please try again.\n";
+            return false;
+        }
     }
+
+    public function getAdminUser($email)
+    {
+        $users = $this->getAllUsers();
+        foreach ($users as $user) {
+            if (isset($user['role']) && isset($user['email']) && $user['role'] === 'admin' && $user['email'] === $email) {
+                return $user;
+            }
+        }
+        return null;
+    }
+
 
     public function adminLoggedIn()
     {

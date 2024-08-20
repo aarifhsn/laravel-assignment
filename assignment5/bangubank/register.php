@@ -2,7 +2,7 @@
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-use Bangubank\User;
+use Bangubank\Models\User;
 
 $user = new User();
 

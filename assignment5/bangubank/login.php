@@ -2,13 +2,16 @@
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-use Bangubank\AdminUser;
-use Bangubank\User;
+use Bangubank\Models\AdminUser;
+use Bangubank\Models\User;
 
-session_start(); // Start the session
+//Start the session.
+if (session_status() == PHP_SESSION_NONE) {
+  session_start();
+}
 
 $user = new User();
-$admin_user = new AdminUser(__DIR__ . '/users.json');
+$admin_user = new AdminUser(__DIR__ . '/storage/users.json');
 
 if ($user->isLoggedIn()) {
   header('Location: ' . ($_SESSION['role'] === 'admin' ? 'admin/customers.php' : 'customer/dashboard.php'));

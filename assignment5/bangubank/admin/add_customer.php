@@ -4,35 +4,78 @@ namespace Bangubank\Admin;
 
 require __DIR__ . '/../vendor/autoload.php';
 
-use Bangubank\AdminUser;
-use Bangubank\User;
+use Bangubank\Models\AdminUser;
+use Bangubank\Models\User;
 
 session_start();
 
-// Initialize User and AdminUser objects
 $user = new User();
-$admin_user = new AdminUser($filePath);
+$admin_user = new AdminUser(__DIR__ . '/../storage/users.json');
 
 // Set the path to the users.json file
-$user->filePath = __DIR__ . '/../users.json';
-$admin_user->filePath = __DIR__ . '/../users.json';
+$user->filePath = __DIR__ . '/../storage/users.json';
 
 if (!$admin_user->adminLoggedIn()) {
   header('Location: ../customer/dashboard.php');
   exit;
 }
 
-// get all users except admin users
-$users = $user->getAllUsers();
+$error = [];
+$fname = $lname =  $email = $password = '';
 
-// filter out admin users
-$users = array_filter($users, function ($user) {
-  return $user['role'] !== 'admin';
-});
+function sanitize($data)
+{
+  return htmlspecialchars(stripslashes(trim($data)));
+}
 
-// sort users by recent activity
-$users = array_reverse($users);
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+  // Name Validation
+  if (empty($_POST['first-name'])) {
+    $error['first-name'] = "Enter your First name";
+  } else {
+    $fname = sanitize($_POST['first-name']);
+  }
 
+  if (empty($_POST['last-name'])) {
+    $error['last-name'] = "Enter your Last name";
+  } else {
+    $lname = sanitize($_POST['last-name']);
+  }
+
+  // Email Validation
+  if (empty($_POST['email'])) {
+    $error['email'] = "Enter your email";
+  } else {
+    $email = sanitize($_POST['email']);
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+      $error['email'] = "Enter a valid email";
+    }
+  }
+
+  // Password Validation
+  if (empty($_POST['password'])) {
+    $error['password'] = "Enter your password";
+  } elseif (strlen($_POST['password']) < 6) {
+    $error['password'] = "Password must be at least 6 characters";
+  } else {
+    $password = sanitize($_POST['password']);
+  }
+
+  if (empty($error)) {
+    if ($user->emailExists($email)) {
+      $error['email'] = "Email already exists";
+    } else {
+      if ($user->registeredByAdmin($fname, $lname, $email, $password)) {
+        $message = "Account created successfully";
+        $encodedMessage = urlencode($message);
+        header("Location: ./customers.php?message=$encodedMessage");
+        exit();
+      } else {
+        $error['general'] = "Something went wrong. Please try again.";
+      }
+    }
+  }
+}
 ?>
 
 <!DOCTYPE html>
@@ -44,6 +87,7 @@ $users = array_reverse($users);
 
   <!-- Tailwindcss CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+
 
   <!-- AlpineJS CDN -->
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -60,7 +104,7 @@ $users = array_reverse($users);
     }
   </style>
 
-  <title>All Customers</title>
+  <title>Add a New Customer</title>
 </head>
 
 <body class="h-full">
@@ -86,7 +130,7 @@ $users = array_reverse($users);
                   <button @click="open = !open" type="button" class="flex text-sm bg-white rounded-full focus:outline-none" id="user-menu-button" aria-expanded="false" aria-haspopup="true">
                     <span class="sr-only">Open user menu</span>
                     <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-sky-100">
-                      <span class="font-medium leading-none text-sky-700"><?php echo ucfirst($user->getFirstChar($user->getName())); ?></span>
+                      <span class="font-medium leading-none text-sky-700 capitalize"><?php echo ucfirst($user->getFirstChar($user->getName())); ?></span>
                     </span>
                     <!-- <img
                         class="w-10 h-10 rounded-full"
@@ -161,113 +205,84 @@ $users = array_reverse($users);
       <header class="py-10">
         <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <h1 class="text-3xl font-bold tracking-tight text-white">
-            Customers
+            Add a New Customer
           </h1>
         </div>
-        <div class="fixed top-28 left-1/2 translate-x-[-50%] translate-y-[-50%]"">
-          <?php
-          if (isset($_GET['message'])) { ?>
-            <div class=" redirect_message text-center py-6 text-white font-bold">
-          <?php
-            $message = urldecode($_GET['message']);
-            echo "<p>{$message}</p>";
-          ?>
-        </div>
-      <?php } ?>
+      </header>
     </div>
-    </header>
-  </div>
 
-  <main class="-mt-32">
-    <div class="px-4 pb-12 mx-auto max-w-7xl sm:px-6 lg:px-8">
-      <div class="py-8 bg-white rounded-lg">
-        <!-- List of All The Customers -->
-        <div class="px-4 sm:px-6 lg:px-8">
-          <div class="sm:flex sm:items-center">
-            <div class="sm:flex-auto">
-              <p class="mt-2 text-sm text-gray-600">
-                A list of all the customers including their name, email and
-                profile picture.
-              </p>
+    <main class="-mt-32">
+      <div class="px-4 pb-12 mx-auto max-w-7xl sm:px-6 lg:px-8">
+        <div class="bg-white rounded-lg">
+          <?php if (isset($message) && !empty($message)) : ?>
+            <div class="p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg" role="alert">
+              <?php echo $message; ?>
             </div>
-            <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-              <a href="./add_customer.php" type="button" class="block px-3 py-2 text-sm font-semibold text-center text-white rounded-md shadow-sm bg-sky-600 hover:bg-sky-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600">
-                Add Customer
-              </a>
+          <?php endif; ?>
+          <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="POST" class="bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-xl md:col-span-2">
+            <div class="px-4 py-6 sm:p-8">
+              <div class="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+                <div class="sm:col-span-3">
+                  <label for="first-name" class="block text-sm font-medium leading-6 text-gray-900">First Name</label>
+                  <div class="mt-2">
+                    <input type="text" name="first-name" id="first-name" autocomplete="given-name" required class="block w-full p-2 text-gray-900 border-0 rounded-md shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-sky-600 sm:text-sm sm:leading-6" />
+                  </div>
+                  <?php if (isset($error['first-name'])) : ?>
+                    <p class="text-red-500 text-sm mt-1">
+                      <?php echo $error['first-name']; ?>
+                    </p>
+                  <?php endif; ?>
+                </div>
+
+                <div class="sm:col-span-3">
+                  <label for="last-name" class="block text-sm font-medium leading-6 text-gray-900">Last Name</label>
+                  <div class="mt-2">
+                    <input type="text" name="last-name" id="last-name" autocomplete="family-name" required class="block w-full p-2 text-gray-900 border-0 rounded-md shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-sky-600 sm:text-sm sm:leading-6" />
+                  </div>
+                  <?php if (isset($error['last-name'])) : ?>
+                    <p class="text-red-500 text-sm mt-1">
+                      <?php echo $error['last-name']; ?>
+                    </p>
+                  <?php endif; ?>
+                </div>
+
+                <div class="sm:col-span-3">
+                  <label for="email" class="block text-sm font-medium leading-6 text-gray-900">Email Address</label>
+                  <div class="mt-2">
+                    <input type="email" name="email" id="email" autocomplete="email" required class="block w-full p-2 text-gray-900 border-0 rounded-md shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-sky-600 sm:text-sm sm:leading-6" />
+                  </div><?php if (isset($error['email'])) : ?>
+                    <p class="text-red-500 text-sm mt-1">
+                      <?php echo $error['email']; ?>
+                    </p>
+                  <?php endif; ?>
+
+                </div>
+
+                <div class="sm:col-span-3">
+                  <label for="password" class="block text-sm font-medium leading-6 text-gray-900">Password</label>
+                  <div class="mt-2">
+                    <input type="password" name="password" id="password" autocomplete="password" required class="block w-full p-2 text-gray-900 border-0 rounded-md shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-sky-600 sm:text-sm sm:leading-6" />
+                  </div>
+                  <?php if (isset($error['password'])) : ?>
+                    <p class="text-red-500 text-sm mt-1">
+                      <?php echo $error['password']; ?>
+                    </p>
+                  <?php endif; ?>
+                </div>
+              </div>
             </div>
-          </div>
-
-          <!-- Users List -->
-          <div class="flow-root mt-8">
-            <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-              <ul role="list" class="divide-y divide-gray-100">
-
-                <?php
-                foreach ($users as $customer) {
-                  $customer_name = !empty($customer['name']) ? $customer['name'] : $customer['fname'] . ' ' . $customer['lname'];
-                  $customer_email = $customer['email'];
-                ?>
-
-                  <?php if ((!empty($customer_name) || (!empty($customer_fname) || !empty($customer_email)))): ?>
-
-                    <li class="relative flex justify-between px-4 py-5 gap-x-6 hover:bg-gray-50 sm:px-6 lg:px-8">
-                      <div class="flex gap-x-4">
-                        <!-- You can either use image or name initials as avatar -->
-                        <!-- <img
-                          class="flex-none w-12 h-12 rounded-full bg-gray-50"
-                          src="https://avatars.githubusercontent.com/u/61485238"
-                          alt="Al Nahian" /> -->
-
-                        <?php // Array of color classes to be used for users
-                        $colors = [
-                          'bg-sky-500',
-                          'bg-gray-500',
-                          'bg-red-500',
-                          'bg-green-500',
-                          'bg-yellow-500',
-                          'bg-blue-500',
-                          'bg-indigo-500',
-                          'bg-purple-500',
-                          'bg-pink-500',
-                          'bg-orange-500'
-                        ];
-                        ?>
-                        <span class="inline-flex items-center justify-center w-12 h-12 rounded-full <?php echo $colors[array_rand($colors)]; ?>">
-                          <span class="text-xl font-medium leading-none text-white">
-                            <?php
-                            $name = $customer_name;
-                            $name = explode(' ', $name);
-                            $first = ucfirst($name[0][0]);
-                            $last = ucfirst($name[1][0]);
-                            echo $first . $last;
-                            ?>
-                          </span>
-                        </span>
-
-                        <div class="flex-auto min-w-0">
-                          <p class="text-sm font-semibold leading-6 text-gray-900">
-                            <a href="<?php echo '../admin/customer_transactions.php?email=' . urlencode($customer_email); ?>">
-                              <span class="absolute inset-x-0 bottom-0 -top-px"></span>
-                              <?php echo ucfirst($customer_name); ?>
-                            </a>
-                          </p>
-                          <p class="flex mt-1 text-xs leading-5 text-gray-500">
-                            <a href="<?php echo '../admin/customer_transactions.php?email=' . urlencode($customer_email); ?>" class="relative truncate hover:underline"><?php echo strtolower($customer_email); ?></a>
-                          </p>
-                        </div>
-                      </div>
-                    </li>
-                <?php
-                  endif;
-                } // end foreach
-                ?>
-              </ul>
+            <div class="flex items-center justify-end px-4 py-4 border-t gap-x-6 border-gray-900/10 sm:px-8">
+              <button type="reset" class="text-sm font-semibold leading-6 text-gray-900">
+                Cancel
+              </button>
+              <button type="submit" class="px-3 py-2 text-sm font-semibold text-white rounded-md shadow-sm bg-sky-600 hover:bg-sky-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600">
+                Create Customer
+              </button>
             </div>
-          </div>
+          </form>
         </div>
       </div>
-    </div>
-  </main>
+    </main>
   </div>
 </body>
 

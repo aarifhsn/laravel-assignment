@@ -4,18 +4,17 @@ namespace Bangubank\Customer;
 
 require __DIR__ . '/../vendor/autoload.php';
 
-use Bangubank\User;
-use Bangubank\AccountManagement;
-
-session_start();
+use Bangubank\Models\User;
+use Bangubank\Models\AccountManagement;
+use Bangubank\Models\BalanceManager;
 
 $user = new User();
 // Set the path to the users.json file
-$user->filePath = __DIR__ . '/../users.json';
+$user->filePath = __DIR__ . '/../storage/users.json';
 
 $accountManagement = new AccountManagement($user);
+$balanceManager = new BalanceManager($user);
 
-// Check if the user is logged in
 if ($user->isLoggedIn()) {
   $email = $_SESSION['email'];
 } else {
@@ -34,17 +33,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   if (is_numeric($amount) && $amount > 0) {
     $amount = (float)$amount;
 
-    // Attempt to deposit the amount
-    if ($accountManagement->deposit($receiver_name = '', $email, $amount)) {
-      $message = "Deposit Successful. New Balance: $" . $accountManagement->getBalance();
+    // Attempt to withdraw the amount
+    if ($accountManagement->withdraw($receiver_name, $email, $amount)) {
+      $message = "Withdraw Successful. New Balance: $" . $balanceManager->getBalance();
     } else {
-      error_log('Deposit failed in AccountManagement::deposit'); // Debugging statement
-      $message = "Failed to deposit. Please try again.";
+      $message = "Failed to withdraw. Please check your balance or try again.";
     }
   } else {
     $message = "Invalid amount";
   }
 }
+
 
 ?>
 
@@ -73,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
   </style>
 
-  <title>Deposit Balance</title>
+  <title>Withdraw Balance</title>
 </head>
 
 <body class="h-full">
@@ -88,8 +87,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="flex space-x-4">
                   <!-- Current: "bg-emerald-700 text-white", Default: "text-white hover:bg-emerald-500 hover:bg-opacity-75" -->
                   <a href="./dashboard.php" class="text-white hover:bg-emerald-500 hover:bg-opacity-75 rounded-md py-2 px-3 text-sm font-medium" aria-current="page">Dashboard</a>
-                  <a href="./deposit.php" class="bg-emerald-700 text-white rounded-md py-2 px-3 text-sm font-medium">Deposit</a>
-                  <a href="./withdraw.php" class="text-white hover:bg-emerald-500 hover:bg-opacity-75 rounded-md py-2 px-3 text-sm font-medium">Withdraw</a>
+                  <a href="./deposit.php" class="text-white hover:bg-emerald-500 hover:bg-opacity-75 rounded-md py-2 px-3 text-sm font-medium">Deposit</a>
+                  <a href="./withdraw.php" class="bg-emerald-700 text-white rounded-md py-2 px-3 text-sm font-medium">Withdraw</a>
                   <a href="./transfer.php" class="text-white hover:bg-emerald-500 hover:bg-opacity-75 rounded-md py-2 px-3 text-sm font-medium">Transfer</a>
                 </div>
               </div>
@@ -139,9 +138,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <div class="space-y-1 pt-2 pb-3">
             <a href="./dashboard.php" class="text-white hover:bg-emerald-500 hover:bg-opacity-75 block rounded-md py-2 px-3 text-base font-medium" aria-current="page">Dashboard</a>
 
-            <a href="./deposit.php" class="bg-emerald-700 text-white block rounded-md py-2 px-3 text-base font-medium">Deposit</a>
+            <a href="./deposit.php" class="text-white hover:bg-emerald-500 hover:bg-opacity-75 block rounded-md py-2 px-3 text-base font-medium">Deposit</a>
 
-            <a href="./withdraw.php" class="text-white hover:bg-emerald-500 hover:bg-opacity-75 block rounded-md py-2 px-3 text-base font-medium">Withdraw</a>
+            <a href="./withdraw.php" class="bg-emerald-700 text-white block rounded-md py-2 px-3 text-base font-medium">Withdraw</a>
 
             <a href="./transfer.php" class="text-white hover:bg-emerald-500 hover:bg-opacity-75 block rounded-md py-2 px-3 text-base font-medium">Transfer</a>
           </div>
@@ -180,7 +179,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <header class="py-10">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <h1 class="text-3xl font-bold tracking-tight text-white">
-            Deposit Balance
+            Withdaw Balance
           </h1>
         </div>
       </header>
@@ -196,17 +195,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 Current Balance
               </dt>
               <dd class="w-full flex-none text-3xl font-medium leading-10 tracking-tight text-gray-900">
-                <?php echo '$' . $accountManagement->getBalance(); ?>
+                <?php echo '$' . $balanceManager->getBalance(); ?>
               </dd>
             </div>
           </dl>
 
           <hr />
-          <!-- Deposit Form -->
+          <!-- Withdaw Form -->
           <div class="sm:rounded-lg">
             <div class="px-4 py-5 sm:p-6">
               <h3 class="text-lg font-semibold leading-6 text-gray-800">
-                Deposit Money To Your Account
+                Withdaw Money From Your Account
               </h3>
               <?php if ($message) : ?>
                 <div class="mt-2 text-sm text-green-500"><?php echo $message; ?></div>

@@ -4,7 +4,7 @@
         "name": "MD ARIF HASSAN",
         "email": "aarifhsn@gmail.com",
         "password": "$2y$10$WvGLQ9g3KXYGEgAar\/7mveBK.QCZe0ewV1eihtGhvD7Y3ozJurKgy",
-        "balance": 2800
+        "balance": 3300
     },
     {
         "name": "Marfi Ahmed",
@@ -44,7 +44,7 @@
     {
         "name": "Marfi Ahmed",
         "email": "mhasanb006@gmail.com",
-        "balance": 300
+        "balance": 460
     },
     {
         "name": "newadmin",
@@ -59,6 +59,81 @@
         "lname": "Lindsey",
         "email": "lymy@mailinator.com",
         "password": "$2y$10$fFyw4gA6Uo.s6KRI\/ASS1e8sBppBdU6mbN53E3iY01utYaeeUC6BK",
+        "balance": 0
+    },
+    {
+        "id": "66c4314c06d16",
+        "fname": "Damon",
+        "lname": "Nash",
+        "email": "tebivudy@mailinator.com",
+        "password": "$2y$10$q3YVsUT8VZQEVkPJlRwoJ.omrv4LjQsTVnDW\/.hg34oZQeRIWbRqC",
+        "balance": 0
+    },
+    {
+        "id": "66c4315699235",
+        "fname": "Jaime",
+        "lname": "Weiss",
+        "email": "gasalek@mailinator.com",
+        "password": "$2y$10$O7xDtdTRmQvtEV2T6n7d2u0agT6.hW.pb2\/HYlH5gtYFxZFM3t1zG",
+        "balance": 0
+    },
+    {
+        "id": "66c44a5b3ad89",
+        "name": "Summer Lara",
+        "email": "natemuduhu@mailinator.com",
+        "password": "$2y$10$I5hqCZWodCksWYqtlPZCKuN5ygSNgwZ2WyEyy0n1FnBxjQDwHUB4u",
+        "balance": 390
+    },
+    {
+        "name": "admin222",
+        "email": "admin22@gmail.com",
+        "password": "$2y$10$Z2jRDW2IME5aV\/N7LhoEx.hdxSXB.H\/Zlf9wVI7w2oWMp5oxH9IFm",
+        "role": "admin",
+        "created_at": "2024-08-20 10:18:40"
+    },
+    {
+        "name": "newadmin11",
+        "email": "newadmin111@gmail.com",
+        "password": "$2y$10$viF6uyT9vVRE\/pjezPuFLeKaHf3Iiev\/sCYXjAMBCaV6wIfpwXmK.",
+        "role": "admin",
+        "created_at": "2024-08-20 10:21:55"
+    },
+    {
+        "id": "66c4528b25755",
+        "fname": "Callie",
+        "lname": "Dale",
+        "email": "qosojogek@mailinator.com",
+        "password": "$2y$10$0OWVWowYG7b6512IfBjssuj3VHj5Vniiz9UHBsWSABB0jGH7iiRNy",
+        "balance": 0
+    },
+    {
+        "id": "66c4c31c09bf8",
+        "fname": "Penelope",
+        "lname": "Acevedo",
+        "email": "hitih@mailinator.com",
+        "password": "$2y$10$LFfITjewE8.Tn.wam.xxUeUKEm.1jMvofJwJJfRIRYW4IukOyLnhe",
+        "balance": 2600
+    },
+    {
+        "id": "66c4d64fb27e9",
+        "name": "Yardley May",
+        "email": "deguhaf@mailinator.com",
+        "password": "$2y$10$VNOKYB1yTSSPUOd2YMyIw.1fTotlJJB6.MpgnfEfglAlYpj3ojAFa",
+        "balance": 200
+    },
+    {
+        "name": "admin111",
+        "email": "admin111@gmail.com",
+        "password": "$2y$10$vcj4PLd76gKSuBdPxokUiuxs8QXTRn.kuwSSe6YqmWgMRGP8Lrqgm",
+        "role": "admin",
+        "created_at": "2024-08-20 19:47:21"
+    },
+    {
+        "id": "66c4d6d451533",
+        "fname": "Kuame",
+        "lname": "Bowers",
+        "email": "tamyqeg@mailinator.com",
+        "password": "$2y$10$F60YLDE5GicUCA10qXVaxOiIgsPeStEPxwuVJjQk8rk9ju8vayev2",
         "balance": 0
     }
 ]

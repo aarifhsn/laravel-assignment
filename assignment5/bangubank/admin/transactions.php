@@ -4,41 +4,35 @@ namespace Bangubank\Admin;
 
 require __DIR__ . '/../vendor/autoload.php';
 
-use Bangubank\AdminUser;
-use Bangubank\User;
-use Bangubank\AccountManagement;
+use Bangubank\Models\AdminUser;
+use Bangubank\Models\User;
+use Bangubank\Models\AccountManagement;
+use Bangubank\Models\BalanceManager;
 
-session_start();
-
+// Initialize User and AdminUser objects
 $user = new User();
-$accountManagement = new AccountManagement($user);
 $admin_user = new AdminUser($filePath);
+$accountManagement = new AccountManagement($user);
+$balanceManager = new BalanceManager($user);
 
 // Set the path to the users.json file
-$user->filePath = __DIR__ . '/../users.json';
-$admin_user->filePath = __DIR__ . '/../users.json';
+$user->filePath = __DIR__ . '/../storage/users.json';
+$admin_user->filePath = __DIR__ . '/../storage/users.json';
 
 if (!$admin_user->adminLoggedIn()) {
-  header('Location: ../customer/dashboard.php');
+  header('Location: /../customer/dashboard.php');
   exit;
 }
 
-// Retrieve email from the query parameter
-$filteredEmail = isset($_GET['email']) ? $_GET['email'] : null;
+// if ($user->isLoggedIn()) {
+//   $email = $_SESSION['email'];
+// } else {
+//   echo "User not logged in.";
+//   exit;
+// }
 
-// Get the user name based on the provided email
-
-$customer = $user->getUserByEmail($filteredEmail);
-$customer_name = !empty($customer['name']) ? $customer['name'] : ($customer['fname'] . ' ' . $customer['lname']);
-
-
-if ($filteredEmail) {
-  // Fetch transactions related to the provided email
-  $customer_transactions = $accountManagement->getUserTransactionsByEmail($filteredEmail);
-} else {
-  echo "No email provided.";
-  exit;
-}
+$getBalance = $balanceManager->getBalance();
+$transactions = $accountManagement->getTransactions();
 
 ?>
 
@@ -67,7 +61,7 @@ if ($filteredEmail) {
     }
   </style>
 
-  <title>Transactions of Al Nahian</title>
+  <title>Transactions</title>
 </head>
 
 <body class="h-full">
@@ -82,7 +76,7 @@ if ($filteredEmail) {
                 <div class="flex space-x-4">
                   <!-- Current: "bg-sky-700 text-white", Default: "text-white hover:bg-sky-500 hover:bg-opacity-75" -->
                   <a href="./customers.php" class="text-white hover:bg-sky-500 hover:bg-opacity-75 rounded-md py-2 px-3 text-sm font-medium">Customers</a>
-                  <a href="./transactions.php" class="text-white hover:bg-sky-500 hover:bg-opacity-75 rounded-md py-2 px-3 text-sm font-medium">Transactions</a>
+                  <a href="./transactions.php" class="bg-sky-700 text-white rounded-md py-2 px-3 text-sm font-medium">Transactions</a>
                 </div>
               </div>
             </div>
@@ -97,7 +91,7 @@ if ($filteredEmail) {
                         src="https://avatars.githubusercontent.com/u/831997"
                         alt="Ahmed Shamim Hasan Shaon" /> -->
                     <span class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-sky-100">
-                      <span class="font-medium leading-none text-sky-700"><?php echo $user->getFirstChar($user->getName()); ?></span>
+                      <span class="font-medium leading-none text-sky-700"><?php echo ucfirst($user->getFirstChar($user->getName())); ?></span>
                     </span>
                   </button>
                 </div>
@@ -140,7 +134,7 @@ if ($filteredEmail) {
                     src="https://avatars.githubusercontent.com/u/831997"
                     alt="Ahmed Shamim Hasan Shaon" /> -->
                 <span class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-sky-100">
-                  <span class="font-medium leading-none text-sky-700"><?php echo $user->getFirstChar($user->getName()); ?></span>
+                  <span class="font-medium leading-none text-sky-700"><?php echo ucfirst($user->getFirstChar($user->getName())); ?></span>
                 </span>
               </div>
               <div class="ml-3">
@@ -159,7 +153,7 @@ if ($filteredEmail) {
               </button>
             </div>
             <div class="mt-3 space-y-1 px-2">
-              <a href="./logout.php" class="block rounded-md px-3 py-2 text-base font-medium text-white hover:bg-sky-500 hover:bg-opacity-75">Sign out</a>
+              <a href="../logout.php" class="block rounded-md px-3 py-2 text-base font-medium text-white hover:bg-sky-500 hover:bg-opacity-75">Sign out</a>
             </div>
           </div>
         </div>
@@ -167,7 +161,7 @@ if ($filteredEmail) {
       <header class="py-10">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <h1 class="text-3xl font-bold tracking-tight text-white">
-            Transactions of <?php echo $customer_name; ?>
+            Transactions
           </h1>
         </div>
       </header>
@@ -181,7 +175,7 @@ if ($filteredEmail) {
             <div class="sm:flex sm:items-center">
               <div class="sm:flex-auto">
                 <p class="mt-2 text-sm text-gray-700">
-                  List of transactions made by <?php echo $customer_name; ?> (<?php echo $filteredEmail; ?>)
+                  List of transactions made by the customers.
                 </p>
               </div>
             </div>
@@ -192,9 +186,9 @@ if ($filteredEmail) {
                     <thead>
                       <tr>
                         <th scope="col" class="whitespace-nowrap py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0">
-                          Receiver Name
+                          Customer Name
                         </th>
-                        <th scope="col" class="whitespace-nowrap py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0">
+                        <th scope="col" class="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900">
                           Email
                         </th>
                         <th scope="col" class="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900">
@@ -206,13 +200,13 @@ if ($filteredEmail) {
                       </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 bg-white">
-                      <?php if (!empty($customer_transactions)) : ?>
-                        <?php foreach ($customer_transactions as $transaction) : ?>
+                      <?php if (!empty($transactions)) { ?>
+                        <?php foreach ($transactions as $transaction) { ?>
                           <tr>
                             <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-800 sm:pl-0">
                               <?php echo $transaction['receiver_name']; ?>
                             </td>
-                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-500 sm:pl-0">
+                            <td class="whitespace-nowrap px-2 py-4 text-sm font-medium text-red-600">
                               <?php echo $transaction['receiver_email']; ?>
                             </td>
                             <td class="whitespace-nowrap px-2 py-4 text-sm font-medium <?php echo $transaction['type'] == 'deposit' ? 'text-emerald-600' : 'text-red-600'; ?>">
@@ -225,14 +219,12 @@ if ($filteredEmail) {
                               <?php echo $transaction['date']; ?>
                             </td>
                           </tr>
-                        <?php endforeach; ?>
-                      <?php else : ?>
-                        <tr>
-                          <td colspan="4" class="whitespace-nowrap py-4 text-center text-sm text-gray-500">
-                            No transactions found for this user.
-                          </td>
-                        </tr>
-                      <?php endif; ?>
+                        <?php } // end foreach 
+                        ?>
+                      <?php } // endif
+                      else {
+                        echo '<tr><td colspan="4" class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-800 sm:pl-0">No transactions found.</td></tr>';
+                      } ?>
 
                     </tbody>
                   </table>

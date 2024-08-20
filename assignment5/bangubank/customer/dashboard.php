@@ -4,17 +4,19 @@ namespace Bangubank\Customer;
 
 require __DIR__ . '/../vendor/autoload.php';
 
-use Bangubank\User;
-use Bangubank\AccountManagement;
+use Bangubank\Models\User;
+use Bangubank\Models\AccountManagement;
+use Bangubank\Models\BalanceManager;
 
 session_start();
 
 $user = new User();
 
 // Set the path to the users.json file
-$user->filePath = __DIR__ . '/../users.json';
+$user->filePath = __DIR__ . '/../storage/users.json';
 
 $accountManagement = new AccountManagement($user);
+$balanceManager = new BalanceManager($user);
 
 if ($user->isLoggedIn()) {
   $email = $_SESSION['email'];
@@ -24,7 +26,7 @@ if ($user->isLoggedIn()) {
 }
 
 
-$getBalance = $accountManagement->getBalance();
+$getBalance = $balanceManager->getBalance();
 $transactions = $accountManagement->getTransactions();
 
 // Filter transactions for the logged-in user
@@ -183,7 +185,7 @@ $filteredTransactions = array_filter($transactions, function ($transaction) use 
                 Current Balance
               </dt>
               <dd class="w-full flex-none text-3xl font-medium leading-10 tracking-tight text-gray-900">
-                <?php echo '$' . $accountManagement->getBalance(); ?>
+                <?php echo '$' . $balanceManager->getBalance(); ?>
               </dd>
             </div>
           </dl>
