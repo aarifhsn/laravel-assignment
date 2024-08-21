@@ -2,11 +2,24 @@
 
 namespace Bangubank\Models;
 
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 class User
 {
-    public $filePath = __DIR__ .  '/../../storage/users.json';
+
+    private $filePath;
+
+    public function __construct($filePath)
+    {
+        $this->filePath = $filePath;
+    }
+
+    public function getFilePath()
+    {
+        return $this->filePath;
+    }
 
     public function register($name, $email, $password)
     {

@@ -4,7 +4,12 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 use Bangubank\Models\User;
 
-$user = new User();
+// load configuration
+$config = require __DIR__ . '/app/config/config.php';
+$filePath = $config['filePath'];
+
+// Initialize User and AdminUser objects
+$user = new User($filePath);
 
 $error = [];
 $name = $email = $password = '';

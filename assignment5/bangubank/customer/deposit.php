@@ -8,10 +8,12 @@ use Bangubank\Models\User;
 use Bangubank\Models\AccountManagement;
 use Bangubank\Models\BalanceManager;
 
-$user = new User();
+// load configuration
+$config = require __DIR__ . '/../app/config/config.php';
+$filePath = $config['filePath'];
 
-// Set the path to the users.json file
-$user->filePath = __DIR__ . '/../storage/users.json';
+// Initialize User and AdminUser objects
+$user = new User($filePath);
 
 $accountManagement = new AccountManagement($user);
 $balanceManager = new BalanceManager($user);

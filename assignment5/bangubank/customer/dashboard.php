@@ -8,12 +8,12 @@ use Bangubank\Models\User;
 use Bangubank\Models\AccountManagement;
 use Bangubank\Models\BalanceManager;
 
-session_start();
+// load configuration
+$config = require __DIR__ . '/../app/config/config.php';
+$filePath = $config['filePath'];
 
-$user = new User();
-
-// Set the path to the users.json file
-$user->filePath = __DIR__ . '/../storage/users.json';
+// Initialize User and AdminUser objects
+$user = new User($filePath);
 
 $accountManagement = new AccountManagement($user);
 $balanceManager = new BalanceManager($user);
@@ -24,7 +24,6 @@ if ($user->isLoggedIn()) {
   header('Location: ../login.php');
   exit;
 }
-
 
 $getBalance = $balanceManager->getBalance();
 $transactions = $accountManagement->getTransactions();

@@ -9,27 +9,29 @@ use Bangubank\Models\User;
 use Bangubank\Models\AccountManagement;
 use Bangubank\Models\BalanceManager;
 
+// load configuration
+$config = require __DIR__ . '/../app/config/config.php';
+$filePath = $config['filePath'];
+
 // Initialize User and AdminUser objects
-$user = new User();
+$user = new User($filePath);
 $admin_user = new AdminUser($filePath);
+
 $accountManagement = new AccountManagement($user);
 $balanceManager = new BalanceManager($user);
 
-// Set the path to the users.json file
-$user->filePath = __DIR__ . '/../storage/users.json';
-$admin_user->filePath = __DIR__ . '/../storage/users.json';
 
 if (!$admin_user->adminLoggedIn()) {
   header('Location: /../customer/dashboard.php');
   exit;
 }
 
-// if ($user->isLoggedIn()) {
-//   $email = $_SESSION['email'];
-// } else {
-//   echo "User not logged in.";
-//   exit;
-// }
+if ($user->isLoggedIn()) {
+  $email = $_SESSION['email'];
+} else {
+  echo "User not logged in.";
+  exit;
+}
 
 $getBalance = $balanceManager->getBalance();
 $transactions = $accountManagement->getTransactions();

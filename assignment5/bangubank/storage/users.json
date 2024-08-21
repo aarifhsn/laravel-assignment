@@ -4,7 +4,7 @@
         "name": "MD ARIF HASSAN",
         "email": "aarifhsn@gmail.com",
         "password": "$2y$10$WvGLQ9g3KXYGEgAar\/7mveBK.QCZe0ewV1eihtGhvD7Y3ozJurKgy",
-        "balance": 3300
+        "balance": 3349
     },
     {
         "name": "Marfi Ahmed",
@@ -44,7 +44,7 @@
     {
         "name": "Marfi Ahmed",
         "email": "mhasanb006@gmail.com",
-        "balance": 460
+        "balance": 960
     },
     {
         "name": "newadmin",
@@ -134,6 +134,14 @@
         "lname": "Bowers",
         "email": "tamyqeg@mailinator.com",
         "password": "$2y$10$F60YLDE5GicUCA10qXVaxOiIgsPeStEPxwuVJjQk8rk9ju8vayev2",
+        "balance": 0
+    },
+    {
+        "id": "66c57eb69a0de",
+        "fname": "Sawyer",
+        "lname": "Larson",
+        "email": "lacofu@mailinator.com",
+        "password": "$2y$10$d7.iSPEaqJHfVK.r4lSpi.sxLu3o92xZBHEsnAsQZSm85IReUMKqi",
         "balance": 0
     }
 ]

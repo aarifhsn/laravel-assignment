@@ -2,6 +2,8 @@
 
 namespace Bangubank\Models;
 
+use Bangubank\Models\User;
+
 class BalanceManager
 {
 
@@ -48,7 +50,7 @@ class BalanceManager
             error_log("Created new user for email: $email with amount: $amount");
         }
 
-        if (file_put_contents($this->user->filePath, json_encode($users, JSON_PRETTY_PRINT))) {
+        if (file_put_contents($this->user->getFilePath(), json_encode($users, JSON_PRETTY_PRINT))) {
             return true;
         } else {
             error_log("Failed to update user balance in file");

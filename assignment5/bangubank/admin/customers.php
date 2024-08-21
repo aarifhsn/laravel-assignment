@@ -7,13 +7,13 @@ require __DIR__ . '/../vendor/autoload.php';
 use Bangubank\Models\AdminUser;
 use Bangubank\Models\User;
 
-// Initialize User and AdminUser objects
-$user = new User();
-$admin_user = new AdminUser($filePath);
+// load configuration
+$config = require __DIR__ . '/../app/config/config.php';
+$filePath = $config['filePath'];
 
-// Set the path to the users.json file
-$user->filePath = __DIR__ . '/../storage/users.json';
-$admin_user->filePath = __DIR__ . '/../storage/users.json';
+// Initialize User and AdminUser objects
+$user = new User($filePath);
+$admin_user = new AdminUser($filePath);
 
 if (!$admin_user->adminLoggedIn()) {
   header('Location: ../customer/dashboard.php');

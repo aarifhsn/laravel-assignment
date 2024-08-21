@@ -4,7 +4,7 @@ namespace Bangubank\Models;
 
 class AdminUser
 {
-    public $filePath;
+    private $filePath;
 
     public function __construct($filePath)
     {
@@ -105,7 +105,11 @@ class AdminUser
     {
         if ($this->adminLoggedIn()) {
             $admin_user = $this->getAdminUser($_SESSION['email']);
-            return $admin_user['name'];
+            if ($admin_user) {
+                return $admin_user['name'];
+            } else {
+                return 'Unknown Admin';
+            }
         }
     }
 
