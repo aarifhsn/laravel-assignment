@@ -6,19 +6,38 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+require __DIR__ . '/../config/config.php';
+
 class User
 {
 
     private $filePath;
+    private $pdo;
 
-    public function __construct($filePath)
+    public function __construct($config)
     {
-        $this->filePath = $filePath;
+        if (isset($config['filePath'])) {
+            $this->filePath = $config['filePath'];
+        } else {
+            throw new \InvalidArgumentException('Invalid configuration: filePath not set.');
+        }
+
+        if (isset($config['storage']) && $config['storage'] === 'database') {
+            $this->pdo = require __DIR__ . '/../config/database.php';
+        } else {
+            $this->pdo = null;
+        }
     }
 
     public function getFilePath()
     {
         return $this->filePath;
+    }
+
+    public function isDatabaseStorage()
+    {
+        $config = include_once __DIR__ . '/../../config/config.php';
+        return $config['storage'] === 'database';
     }
 
     public function register($name, $email, $password)
@@ -33,17 +52,32 @@ class User
         // Generate a unique user ID
         $userId = uniqid();
 
-        $user = [
-            'id' => $userId,
-            'name' => $name,
-            'email' => $email,
-            'password' => password_hash($password, PASSWORD_DEFAULT),
-            'balance' => 0
-        ];
+        if ($this->pdo) {
+            // Use database storage
+            $query = "INSERT INTO users ( name, email, password, balance) VALUES ( :name, :email, :password, :balance)";
+            $stmt = $this->pdo->prepare($query);
+
+            $params = [
+                ':name' => $name,
+                ':email' => $email,
+                ':password' => password_hash($password, PASSWORD_DEFAULT),
+                ':balance' => 0
+            ];
+            return $stmt->execute($params);
+        } else {
+            $user = [
+                'id' => $userId,
+                'name' => $name,
+                'email' => $email,
+                'password' => password_hash($password, PASSWORD_DEFAULT),
+                'balance' => 0
+            ];
+        }
 
         $users[] = $user;
 
-        // Write updated data to file
+        // Write updated data to file or storage
+
         if (file_put_contents($this->filePath, json_encode($users, JSON_PRETTY_PRINT))) {
             return true;
         } else {
@@ -87,7 +121,10 @@ class User
 
     public function getAllUsers()
     {
-        if (file_exists($this->filePath)) {
+        if ($this->pdo) {
+            $stmt = $this->pdo->query("SELECT * FROM users");
+            return $stmt->fetchAll();
+        } elseif (file_exists($this->filePath)) {
             $json = file_get_contents($this->filePath);
             return json_decode($json, true);
         }
@@ -96,12 +133,20 @@ class User
 
     public function getUserByEmail($email)
     {
-        $users = $this->getAllUsers();
-        foreach ($users as $user) {
-            if ($user['email'] === $email) {
-                return $user;
+
+        if ($this->pdo) {
+            $stmt = $this->pdo->prepare("SELECT * FROM users WHERE email = ?");
+            $stmt->execute([$email]);
+            return $stmt->fetch();
+        } else {
+            $users = $this->getAllUsers();
+            foreach ($users as $user) {
+                if ($user['email'] === $email) {
+                    return $user;
+                }
             }
         }
+
         return null;
     }
 
@@ -148,14 +193,28 @@ class User
     public function updateUser($updatedUser)
     {
         $users = $this->getAllUsers();
-        foreach ($users as &$user) {
-            if ($user['email'] === $updatedUser['email']) {
-                $user = $updatedUser;
-                if (file_put_contents($this->filePath, json_encode($users, JSON_PRETTY_PRINT))) {
-                    return true;
-                } else {
-                    error_log("Failed to update user");
-                    return false;
+
+        if ($this->pdo) {
+            $query = "UPDATE users SET name = :name, email = :email, password = :password, balance = :balance WHERE id = :id";
+            $stmt = $this->pdo->prepare($query);
+            $params = [
+                ':name' => $updatedUser['name'],
+                ':email' => $updatedUser['email'],
+                ':password' => $updatedUser['password'],
+                ':balance' => $updatedUser['balance'],
+                ':id' => $updatedUser['id']
+            ];
+            return $stmt->execute($params);
+        } else {
+            foreach ($users as &$user) {
+                if ($user['email'] === $updatedUser['email']) {
+                    $user = $updatedUser;
+                    if (file_put_contents($this->filePath, json_encode($users, JSON_PRETTY_PRINT))) {
+                        return true;
+                    } else {
+                        error_log("Failed to update user");
+                        return false;
+                    }
                 }
             }
         }

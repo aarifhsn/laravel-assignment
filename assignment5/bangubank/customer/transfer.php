@@ -13,7 +13,7 @@ $config = require __DIR__ . '/../app/config/config.php';
 $filePath = $config['filePath'];
 
 // Initialize User and AdminUser objects
-$user = new User($filePath);
+$user = new User($config);
 
 $accountManagement = new AccountManagement($user);
 $balanceManager = new BalanceManager($user);

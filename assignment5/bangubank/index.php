@@ -15,7 +15,7 @@ $filePath = $config['filePath'];
 
 
 // Initialize User and AdminUser objects
-$user = new User($filePath);
+$user = new User($config);
 $admin_user = new AdminUser($filePath);
 
 if ($user->isLoggedIn()) {
