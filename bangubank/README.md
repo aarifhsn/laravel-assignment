@@ -35,7 +35,7 @@
 
    ```bash
    git clone https://github.com/aarifhsn/laravel-assignment.git
-   cd laravel-assignment/assignment5/bangubank
+   cd laravel-assignment/bangubank
 
    ```
 
