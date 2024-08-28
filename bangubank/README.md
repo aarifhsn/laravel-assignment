@@ -40,4 +40,6 @@
    ```
 
 2. **Install dependencies**:
-   `composer install`
+   ```bash
+   composer install
+   ```
