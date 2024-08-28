@@ -40,6 +40,12 @@
    ```
 
 2. **Install dependencies**:
+
    ```bash
    composer install
+   ```
+
+3. **Create Admin**
+   ```bash
+   php create-admin.php
    ```
