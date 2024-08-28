@@ -6,6 +6,8 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+//require __DIR__ . '/../config/config.php';
+
 class User
 {
 
@@ -21,7 +23,12 @@ class User
         }
 
         if (isset($config['storage']) && $config['storage'] === 'database') {
-            $this->pdo = require __DIR__ . '/../config/db_setup.php';
+            $this->pdo = new \PDO(
+                'mysql:host=' . $config['db']['host'] . ';dbname=' . $config['db']['database'],
+                $config['db']['username'],
+                $config['db']['password']
+            );
+            $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
         } else {
             $this->pdo = null;
         }
@@ -35,12 +42,11 @@ class User
     public function isDatabaseStorage()
     {
         $config = include_once __DIR__ . '/../config/config.php';
-        if (!$config) {
-            throw new \Exception("Could not include config.php");
+        if ($config === false) {
+            throw new \Exception('Failed to load config file');
         }
         return $config['storage'] === 'database';
     }
-
 
     public function register($name, $email, $password)
     {
@@ -50,6 +56,10 @@ class User
         if ($this->emailExists($email)) {
             return false;
         }
+
+        // Generate a unique user ID
+        $userId = uniqid();
+
         if ($this->pdo) {
             // Use database storage
             $query = "INSERT INTO users ( name, email, password, balance) VALUES ( :name, :email, :password, :balance)";
@@ -63,8 +73,6 @@ class User
             ];
             return $stmt->execute($params);
         } else {
-            // Generate a unique user ID
-            $userId = uniqid();
             $user = [
                 'id' => $userId,
                 'name' => $name,
@@ -135,9 +143,9 @@ class User
     {
 
         if ($this->pdo) {
-            $stmt = $this->pdo->prepare("SELECT * FROM users WHERE email = ?");
-            $stmt->execute([$email]);
-            return $stmt->fetch();
+            $stmt = $this->pdo->prepare("SELECT * FROM users WHERE email = :email");
+            $stmt->execute([':email' => $email]);
+            return $stmt->fetch(\PDO::FETCH_ASSOC);
         } else {
             $users = $this->getAllUsers();
             foreach ($users as $user) {
@@ -192,20 +200,18 @@ class User
 
     public function updateUser($updatedUser)
     {
-        $users = $this->getAllUsers();
-
         if ($this->pdo) {
-            $query = "UPDATE users SET name = :name, email = :email, password = :password, balance = :balance WHERE id = :id";
+            $query = "UPDATE users SET name = :name, email = :email, password = :password, balance = :balance WHERE email = :email";
             $stmt = $this->pdo->prepare($query);
             $params = [
                 ':name' => $updatedUser['name'],
                 ':email' => $updatedUser['email'],
                 ':password' => $updatedUser['password'],
                 ':balance' => $updatedUser['balance'],
-                ':id' => $updatedUser['id']
             ];
             return $stmt->execute($params);
         } else {
+            $users = $this->getAllUsers();
             foreach ($users as &$user) {
                 if ($user['email'] === $updatedUser['email']) {
                     $user = $updatedUser;

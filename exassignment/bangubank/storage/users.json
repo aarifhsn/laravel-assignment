@@ -16,21 +16,11 @@
         "name": "Reuben Mitchell",
         "email": "mezywuc@mailinator.com",
         "password": "$2y$10$hiEdJTRUtr269L7O7Y2O2etHzvx0NWLloDdLCKoMM7ffaHvbpH3uG",
-        "balance": 319
+        "balance": 451
     },
     {
-        "name": "arif hassan",
+        "name": "Marfi Ahmed",
         "email": "aarifhsn@gmail.com",
-        "password": "$2y$10$uvzIDaTakOB.NgTTWjUW2u3pT6mc0RrSbhFNdAeKMaKR8ecvMjUUS",
-        "role": "admin",
-        "created_at": "2024-08-26 20:16:50"
-    },
-    {
-        "id": "66ccc6c0a7e41",
-        "fname": "Mollie",
-        "lname": "Mason",
-        "email": "rixygipi@mailinator.com",
-        "password": "$2y$10$42RrgwPEQ8I9\/0AVoOY1CuB7aWdpGcyOVTn1xNAmih7dBpsnee7cS",
-        "balance": 0
+        "balance": 49
     }
 ]

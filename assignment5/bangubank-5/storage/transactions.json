@@ -1,67 +1,19 @@
 [
     {
-        "type": "withdraw",
-        "sender_email": "mezywuc@mailinator.com",
-        "receiver_name": "Reuben Mitchell",
-        "receiver_email": "mezywuc@mailinator.com",
-        "amount": 44,
-        "date": "26 Aug 2024, 11:45 PM"
-    },
-    {
-        "type": "transfer",
-        "sender_email": "mezywuc@mailinator.com",
-        "receiver_name": "Marfi Ahmed",
-        "receiver_email": "aarifhsn@gmail.com",
+        "type": "deposit",
+        "sender_email": "vyweqit@mailinator.com",
+        "receiver_name": "Damian Wall",
+        "receiver_email": "vyweqit@mailinator.com",
         "amount": 500,
-        "date": "26 Aug 2024, 11:40 PM"
+        "date": "25 Aug 2024, 07:37 PM"
     },
     {
         "type": "deposit",
-        "sender_email": "mezywuc@mailinator.com",
-        "receiver_name": "Reuben Mitchell",
-        "receiver_email": "mezywuc@mailinator.com",
-        "amount": 500,
-        "date": "26 Aug 2024, 11:39 PM"
-    },
-    {
-        "type": "withdraw",
-        "sender_email": "mezywuc@mailinator.com",
-        "receiver_name": "Reuben Mitchell",
-        "receiver_email": "mezywuc@mailinator.com",
+        "sender_email": "vyweqit@mailinator.com",
+        "receiver_name": "Damian Wall",
+        "receiver_email": "vyweqit@mailinator.com",
         "amount": 44,
-        "date": "26 Aug 2024, 11:39 PM"
-    },
-    {
-        "type": "deposit",
-        "sender_email": "mezywuc@mailinator.com",
-        "receiver_name": "Reuben Mitchell",
-        "receiver_email": "mezywuc@mailinator.com",
-        "amount": 44,
-        "date": "26 Aug 2024, 12:29 PM"
-    },
-    {
-        "type": "transfer",
-        "sender_email": "mezywuc@mailinator.com",
-        "receiver_name": "Marfi Ahmed",
-        "receiver_email": "aarifhsn@gmail.com",
-        "amount": 49,
-        "date": "26 Aug 2024, 12:27 PM"
-    },
-    {
-        "type": "deposit",
-        "sender_email": "mezywuc@mailinator.com",
-        "receiver_name": "Reuben Mitchell",
-        "receiver_email": "mezywuc@mailinator.com",
-        "amount": 500,
-        "date": "26 Aug 2024, 12:26 PM"
-    },
-    {
-        "type": "withdraw",
-        "sender_email": "mezywuc@mailinator.com",
-        "receiver_name": "Reuben Mitchell",
-        "receiver_email": "mezywuc@mailinator.com",
-        "amount": 44,
-        "date": "26 Aug 2024, 12:26 PM"
+        "date": "25 Aug 2024, 07:36 PM"
     },
     {
         "type": "deposit",
@@ -345,10 +297,10 @@
     },
     {
         "type": "withdraw",
-        "sender_email": "mezywuc@mailinator.com",
-        "receiver_name": "Reuben Mitchell",
-        "receiver_email": "mezywuc@mailinator.com",
-        "amount": 44,
-        "date": "26 Aug 2024, 11:48 PM"
+        "sender_email": "vyweqit@mailinator.com",
+        "receiver_name": "Damian Wall",
+        "receiver_email": "vyweqit@mailinator.com",
+        "amount": 49,
+        "date": "25 Aug 2024, 07:37 PM"
     }
 ]

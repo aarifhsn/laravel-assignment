@@ -12,24 +12,17 @@ try {
     $pdo->exec("CREATE DATABASE IF NOT EXISTS {$config['db']['database']}");
     $pdo->exec("USE {$config['db']['database']}");
 
-    // Check if the tables exist by querying the information_schema
-    $stmt = $pdo->query("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = '{$config['db']['database']}' AND table_name = 'users'");
-    $tableExists = $stmt->fetchColumn();
-
-    if (!$tableExists) {
-
-        // Create tables if they don't exist
-        $pdo->exec("CREATE TABLE IF NOT EXISTS users (
+    // Create tables if they don't exist
+    $pdo->exec("CREATE TABLE IF NOT EXISTS users (
         id INT AUTO_INCREMENT PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
         email VARCHAR(255) UNIQUE NOT NULL,
         password VARCHAR(255) NOT NULL,
-        role VARCHAR(255) DEFAULT 'customer',
         balance DECIMAL(10,2) DEFAULT 0
     )");
 
-        // Create the transactions table if it doesn't exist
-        $pdo->exec("CREATE TABLE IF NOT EXISTS transactions (
+    // Create the transactions table if it doesn't exist
+    $pdo->exec("CREATE TABLE IF NOT EXISTS transactions (
         id INT AUTO_INCREMENT PRIMARY KEY,
         type VARCHAR(255) NOT NULL,
         sender_email VARCHAR(255) NOT NULL,
@@ -38,8 +31,8 @@ try {
         amount DECIMAL(10, 2) NOT NULL,
         date DATETIME NOT NULL
     )");
-        echo "Database and tables set up successfully!";
-    }
+
+    echo "Database and tables set up successfully!";
 } catch (PDOException $e) {
     echo "Database error: " . $e->getMessage();
     exit;

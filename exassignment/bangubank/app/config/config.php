@@ -2,7 +2,7 @@
 // config.php
 
 return [
-    'storage' => 'database', // or 'file'
+    'storage' => 'file', // or 'file'
     'db' => [
         'host' => 'localhost',
         'database' => 'bangubank',

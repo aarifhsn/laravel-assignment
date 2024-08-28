@@ -6,6 +6,8 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+require __DIR__ . '/../config/config.php';
+
 class User
 {
 
@@ -21,7 +23,7 @@ class User
         }
 
         if (isset($config['storage']) && $config['storage'] === 'database') {
-            $this->pdo = require __DIR__ . '/../config/db_setup.php';
+            $this->pdo = require __DIR__ . '/../config/database.php';
         } else {
             $this->pdo = null;
         }
@@ -35,12 +37,8 @@ class User
     public function isDatabaseStorage()
     {
         $config = include_once __DIR__ . '/../config/config.php';
-        if (!$config) {
-            throw new \Exception("Could not include config.php");
-        }
         return $config['storage'] === 'database';
     }
-
 
     public function register($name, $email, $password)
     {

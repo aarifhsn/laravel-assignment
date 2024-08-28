@@ -15,17 +15,8 @@ $admin_user = new AdminUser($filePath);
 echo "Enter admin name: ";
 $name = trim(fgets(STDIN));
 
-do {
-    echo "Enter admin email: ";
-    $email = trim(fgets(STDIN));
-
-    // Validate email
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        echo "Invalid email format. Please try again.\n";
-    } else {
-        break;
-    }
-} while (true);
+echo "Enter admin email: ";
+$email = trim(fgets(STDIN));
 
 echo "Enter admin password: ";
 $password = trim(fgets(STDIN));
