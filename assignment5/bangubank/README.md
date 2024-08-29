@@ -47,5 +47,6 @@
    php create-admin.php
    ```
 
-4. ** Update storage **
-   -Go to app/config/config.php to update the storage. Default is File
+4. **Update storage**
+
+   - Go to app/config/config.php to update the storage. Default is File
