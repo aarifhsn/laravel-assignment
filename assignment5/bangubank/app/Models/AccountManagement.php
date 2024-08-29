@@ -4,6 +4,8 @@ namespace Bangubank\Models;
 
 use Bangubank\Models\User;
 use Bangubank\Models\BalanceManager;
+use PDO;
+use PDOException;
 
 date_default_timezone_set('Asia/Dhaka');
 
@@ -24,25 +26,67 @@ class AccountManagement
     {
         $user = $this->user->getLoggedInUser();
         if ($user) {
-            $result = $this->user->updateUser($user);
-            if ($result) {
-                error_log("Updating balance for $receiver_name with email $email");
-                $result = $this->balanceManager->updateBalance($receiver_name, $email, $amount);
-                if ($result) {
+            if ($this->user->isDatabaseStorage()) {
+                // Database storage logic
+                $pdo = $this->balanceManager->getPdo();
+
+                try {
+                    // Start a transaction
+                    $pdo->beginTransaction();
+
+                    // Update the balance or insert a new user record if the email does not exist
+                    $stmt = $pdo->prepare("UPDATE users SET balance = balance + :amount WHERE email = :email");
+                    $stmt->execute(['amount' => $amount, 'email' => $email]);
+
+                    if ($stmt->rowCount() === 0) {
+                        // User does not exist, so insert a new record
+                        $stmt = $pdo->prepare("INSERT INTO users (name, email, balance) VALUES (:name, :email, :balance)");
+                        $stmt->execute(['name' => $receiver_name, 'email' => $email, 'balance' => $amount]);
+                    }
+
+                    // Commit the transaction
+                    $pdo->commit();
+
+                    // Log the transaction
                     $this->addTransaction([
                         'type' => 'deposit',
                         'sender_email' => $user['email'],
-                        'receiver_name' => $user['name'],
+                        'receiver_name' => $receiver_name,
                         'receiver_email' => $email,
                         'amount' => $amount,
                         'date' => date('d M Y, h:i A')
                     ]);
+
                     return true;
-                } else {
-                    error_log("Balance update failed for $receiver_name");
+                } catch (PDOException $e) {
+                    // Rollback the transaction if something goes wrong
+                    $pdo->rollBack();
+                    error_log("Database error: " . $e->getMessage());
+                    return false;
                 }
             } else {
-                error_log("User update failed for " . print_r($user, true));
+
+                // File storage logic
+                $result = $this->user->updateUser($user);
+                if ($result) {
+                    error_log("Updating balance for $receiver_name with email $email");
+                    $result = $this->balanceManager->updateBalance($receiver_name, $email, $amount);
+                    if ($result) {
+                        $this->addTransaction([
+                            'type' => 'deposit',
+                            'sender_email' => $user['email'],
+                            'receiver_name' => $user['name'],
+                            'receiver_email' => $email,
+                            'amount' => $amount,
+                            'date' => date('d M Y, h:i A')
+                        ]);
+                        return true;
+                    } else {
+                        error_log("Balance update failed for $receiver_name");
+                    }
+                } else {
+                    error_log("User update failed for " . print_r($user, true));
+                }
             }
         }
         return false;

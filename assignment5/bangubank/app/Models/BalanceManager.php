@@ -33,7 +33,7 @@ class BalanceManager
     {
         if ($this->pdo) {
             // Database storage
-            $stmt = $this->pdo->prepare("UPDATE users SET balance = balance + :amount WHERE email = :email");
+            $stmt = $this->pdo->prepare("UPDATE transactions SET balance = balance + :amount WHERE email = :email");
             $stmt->execute(['amount' => $amount, 'email' => $email]);
 
             if ($stmt->rowCount()) {
