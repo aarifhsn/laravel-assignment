@@ -9,16 +9,12 @@
 - [Configuration](#configuration)
 - [Usage](#usage)
 - [Folder Structure](#folder-structure)
-- [Contributing](#contributing)
-- [License](#license)
 
 ## Features
 
 - **User Authentication**: Registration and login for both Admin and Customer.
 - **Admin Panel**: Manage users, view all transactions.
 - **Customer Panel**: Perform banking operations like deposits, withdrawals, and transfers.
-- **Storage Options**: Choose between file-based or MySQL database storage.
-- **MVC Pattern**: Organized codebase following the MVC architecture.
 
 ## Installation
 
