@@ -5,51 +5,49 @@ namespace Bangubank\Models;
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-
 class User
 {
-
     private $filePath;
     private $pdo;
 
-    public function __construct($config)
+    public function __construct(array $config)
     {
-        if (isset($config['filePath'])) {
-            $this->filePath = $config['filePath'];
-        } else {
-            throw new \InvalidArgumentException('Invalid configuration: filePath not set.');
+        if (empty($config['storage'])) {
+            throw new \InvalidArgumentException('Invalid configuration: storage type not set.');
         }
 
-        if (isset($config['storage']) && $config['storage'] === 'database') {
+        if ($config['storage'] === 'file') {
+            if (isset($config['filePath'])) {
+                $this->filePath = $config['filePath'];
+            } else {
+                throw new \InvalidArgumentException('Invalid configuration: filePath not set.');
+            }
+            $this->pdo = null; // Disable PDO when using file storage
+        } elseif ($config['storage'] === 'database') {
             $this->pdo = require __DIR__ . '/../config/db_setup.php';
+            $this->filePath = null; // Disable file storage when using database
         } else {
-            $this->pdo = null;
+            throw new \InvalidArgumentException('Invalid configuration: unknown storage type.');
         }
     }
 
+
     public function getFilePath()
     {
-        return $this->filePath;
+        if ($this->filePath) {
+            return $this->filePath;
+        }
+        throw new \RuntimeException('File storage is not configured.');
     }
 
     public function isDatabaseStorage()
     {
-        $config = include_once __DIR__ . '/../config/config.php';
-        if (!$config) {
-            throw new \Exception("Could not include config.php");
-        }
-        return $config['storage'] === 'database';
+        return $this->pdo !== null;
     }
-
 
     public function register($name, $email, $password)
     {
-        $users = $this->getAllUsers();
 
-        // Check if email already exists
-        if ($this->emailExists($email)) {
-            return false;
-        }
         if ($this->pdo) {
             // Use database storage
             $query = "INSERT INTO users ( name, email, password, balance) VALUES ( :name, :email, :password, :balance)";
@@ -62,7 +60,14 @@ class User
                 ':balance' => 0
             ];
             return $stmt->execute($params);
-        } else {
+        } elseif ($this->filePath) {
+
+            $users = $this->getAllUsers();
+
+            // Check if email already exists
+            if ($this->emailExists($email)) {
+                return false;
+            }
             // Generate a unique user ID
             $userId = uniqid();
             $user = [
@@ -72,17 +77,13 @@ class User
                 'password' => password_hash($password, PASSWORD_DEFAULT),
                 'balance' => 0
             ];
-        }
 
-        $users[] = $user;
+            $users[] = $user;
 
-        // Write updated data to file or storage
-
-        if (file_put_contents($this->filePath, json_encode($users, JSON_PRETTY_PRINT))) {
-            return true;
+            // Write updated data to file or storage
+            return file_put_contents($this->filePath, json_encode($users, JSON_PRETTY_PRINT));
         } else {
-            error_log("Failed to write users to file");
-            return false;
+            throw new \RuntimeException('File storage is not configured.');
         }
     }
 
@@ -107,54 +108,67 @@ class User
             'balance' => 0
         ];
 
-        $users[] = $user;
+        if ($this->pdo) {
+            // Database storage
+            $query = "INSERT INTO users (id, fname, lname, email, password, balance) VALUES (:id, :fname, :lname, :email, :password, :balance)";
+            $stmt = $this->pdo->prepare($query);
+            $params = [
+                ':id' => $userId,
+                ':fname' => $fname,
+                ':lname' => $lname,
+                ':email' => $email,
+                ':password' => password_hash($password, PASSWORD_DEFAULT),
+                ':balance' => 0
+            ];
+            return $stmt->execute($params);
+        } elseif ($this->filePath) {
+            // File storage
+            $users[] = $user;
 
-        // Write updated data to file
-        if (file_put_contents($this->filePath, json_encode($users, JSON_PRETTY_PRINT))) {
-            return true;
+            return file_put_contents($this->filePath, json_encode($users, JSON_PRETTY_PRINT));
         } else {
-            error_log("Failed to write users to file");
-            return false;
+            throw new \RuntimeException('File storage is not configured.');
         }
     }
-
-
     public function getAllUsers()
     {
         if ($this->pdo) {
             $stmt = $this->pdo->query("SELECT * FROM users");
             return $stmt->fetchAll();
-        } elseif (file_exists($this->filePath)) {
-            $json = file_get_contents($this->filePath);
-            return json_decode($json, true);
+        } elseif ($this->filePath) {
+            if (file_exists($this->filePath)) {
+                $json = file_get_contents($this->filePath);
+                return json_decode($json, true);
+            }
+        } else {
+            throw new \RuntimeException('File storage is not configured.');
         }
+
         return [];
     }
-
     public function getUserByEmail($email)
     {
 
         if ($this->pdo) {
-            $stmt = $this->pdo->prepare("SELECT * FROM users WHERE email = ?");
-            $stmt->execute([$email]);
+            $stmt = $this->pdo->prepare("SELECT * FROM users WHERE email = :email");
+            $stmt->execute([':email' => $email]);
             return $stmt->fetch();
-        } else {
+        } elseif ($this->filePath) {
             $users = $this->getAllUsers();
             foreach ($users as $user) {
                 if ($user['email'] === $email) {
                     return $user;
                 }
             }
+        } else {
+            throw new \RuntimeException('File storage is not configured.');
         }
 
         return null;
     }
-
     public function getName()
     {
-        // Get user details based on the email stored in session
-        $email = $_SESSION['email'] ?? '';
-        $user = $this->getUserByEmail($email);
+        $user = $this->getLoggedInUser();
         return $user['name'] ?? $user['fname'] . ' ' . $user['lname'] ?? 'Guest';
     }
 
@@ -162,7 +176,6 @@ class User
     {
         return $_SESSION['email'] ?? '';
     }
-
     public function emailExists($email)
     {
         $users = $this->getAllUsers();
@@ -176,7 +189,7 @@ class User
 
     public function login($email, $password)
     {
-        $users = $this->getAllUsers();
+        $users = $this->getUserByEmail($email);
         foreach ($users as $user) {
             if ($user['email'] === $email && password_verify($password, $user['password'])) {
                 $_SESSION['logged_in'] = true;
@@ -188,12 +201,8 @@ class User
         return false;
     }
 
-
-
     public function updateUser($updatedUser)
     {
-        $users = $this->getAllUsers();
-
         if ($this->pdo) {
             $query = "UPDATE users SET name = :name, email = :email, password = :password, balance = :balance WHERE id = :id";
             $stmt = $this->pdo->prepare($query);
@@ -205,22 +214,19 @@ class User
                 ':id' => $updatedUser['id']
             ];
             return $stmt->execute($params);
-        } else {
+        } elseif ($this->filePath) {
+            $users = $this->getAllUsers();
             foreach ($users as &$user) {
                 if ($user['email'] === $updatedUser['email']) {
                     $user = $updatedUser;
-                    if (file_put_contents($this->filePath, json_encode($users, JSON_PRETTY_PRINT))) {
-                        return true;
-                    } else {
-                        error_log("Failed to update user");
-                        return false;
-                    }
+                    return file_put_contents($this->filePath, json_encode($users, JSON_PRETTY_PRINT)) !== false;
                 }
             }
+        } else {
+            throw new \RuntimeException('File storage is not configured.');
         }
         return false;
     }
-
     public function getFirstChar($string)
     {
         preg_match_all('/\b\w/', $string, $matches);

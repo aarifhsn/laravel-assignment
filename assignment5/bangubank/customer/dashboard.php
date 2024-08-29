@@ -2,6 +2,9 @@
 
 namespace Bangubank\Customer;
 
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 require __DIR__ . '/../vendor/autoload.php';
 
 use Bangubank\Models\User;
@@ -10,7 +13,7 @@ use Bangubank\Models\BalanceManager;
 
 // load configuration
 $config = require __DIR__ . '/../app/config/config.php';
-$filePath = $config['filePath'];
+$db_setup = require __DIR__ . '/../app/config/db_setup.php';
 
 // Initialize User and AdminUser objects
 $user = new User($config);
@@ -21,6 +24,7 @@ $balanceManager = new BalanceManager($user);
 if ($user->isLoggedIn()) {
   $email = $_SESSION['email'];
 } else {
+  echo "User is not logged in.";
   header('Location: ../login.php');
   exit;
 }
@@ -32,6 +36,7 @@ $transactions = $accountManagement->getTransactions();
 $filteredTransactions = array_filter($transactions, function ($transaction) use ($email) {
   return $transaction['sender_email'] === $email || $transaction['receiver_email'] === $email;
 });
+
 ?>
 
 <!DOCTYPE html>

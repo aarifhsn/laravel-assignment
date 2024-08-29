@@ -3,10 +3,11 @@
 $config = require __DIR__ . '/config.php';
 
 try {
-    $dsn = "mysql:host={$config['db']['host']};charset={$config['db']['charset']}";
-
+    // Include the username and password in the DSN
+    $dsn = "mysql:host={$config['db']['host']};dbname={$config['db']['database']}";
     $pdo = new PDO($dsn, $config['db']['username'], $config['db']['password']);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 
     // Create the database if it doesn't exist
     $pdo->exec("CREATE DATABASE IF NOT EXISTS {$config['db']['database']}");
@@ -40,7 +41,8 @@ try {
     )");
         echo "Database and tables set up successfully!";
     }
+    return $pdo;
 } catch (PDOException $e) {
     echo "Database error: " . $e->getMessage();
-    exit;
+    exit();
 }

@@ -12,42 +12,60 @@ if (session_status() == PHP_SESSION_NONE) {
 
 // load configuration
 $config = require __DIR__ . '/app/config/config.php';
+$db_setup = require __DIR__ . '/app/config/db_setup.php';
 $filePath = $config['filePath'];
 
 // Initialize User and AdminUser objects
 $user = new User($config);
 $admin_user = new AdminUser($filePath);
 
-if ($user->isLoggedIn()) {
-  header('Location: ' . ($_SESSION['role'] === 'admin' ? 'admin/customers.php' : 'customer/dashboard.php'));
-  exit;
-}
 
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
-if (isset($_POST['email']) && isset($_POST['password'])) {
   $email = $_POST['email'];
   $password = $_POST['password'];
 
-  // Check if the user is an admin
-  $admin = $admin_user->getAdminUser($email);
+  if ($config['storage'] === 'database' && isset($pdo)) {
+    $query = 'SELECT * FROM users WHERE email = :email';
 
-  if ($admin) {
-    if (password_verify($password, $admin['password'])) {
-      $_SESSION['email'] = $email;
-      $_SESSION['password'] = $password;
-      $_SESSION['role'] = 'admin';
-      header('Location: admin/customers.php');
-      exit;
-    } else {
-      $loginError = "Invalid password for admin.";
+    $stmt = $pdo->prepare($query);
+
+    if ($stmt->execute([':email' => $email])) {
+      $userData = $stmt->fetch();
+      if ($userData) {
+        $_SESSION['email'] = $userData['email'];
+        $_SESSION['role'] = $userData['role'];
+
+        // Redirect to the appropriate page based on user role
+        header('Location: ' . ($userData['role'] === 'admin' ? 'admin/customers.php' : 'customer/dashboard.php'));
+        exit;
+      } else {
+        $loginError = "Invalid email or password.";
+      }
     }
-  } else {
-    // Check if the user is a customer
-    if ($user->login($email, $password)) {
-      header('Location: customer/dashboard.php');
-      exit;
+  } elseif ($config['storage'] === 'file') {
+
+    // Check if the user is an admin
+    $admin = $admin_user->getAdminUser($email);
+
+    if ($admin) {
+      if (password_verify($password, $admin['password'])) {
+        $_SESSION['email'] = $email;
+        $_SESSION['password'] = $password;
+        $_SESSION['role'] = 'admin';
+        header('Location: admin/customers.php');
+        exit;
+      } else {
+        $loginError = "Invalid password for admin.";
+      }
     } else {
-      $loginError = "Invalid email or password.";
+      // Check if the user is a customer
+      if ($user->login($email, $password)) {
+        header('Location: customer/dashboard.php');
+        exit;
+      } else {
+        $loginError = "Invalid email or password.";
+      }
     }
   }
 }

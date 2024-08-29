@@ -6,6 +6,7 @@ use Bangubank\Models\User;
 
 // load configuration
 $config = require __DIR__ . '/app/config/config.php';
+$db_setup = require __DIR__ . '/app/config/db_setup.php';
 $filePath = $config['filePath'];
 
 // Initialize User and AdminUser objects
@@ -20,13 +21,13 @@ function sanitize($data)
 }
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
+
   // Name Validation
   if (empty($_POST['name'])) {
     $error['name'] = "Enter your name";
   } else {
     $name = sanitize($_POST['name']);
   }
-
   // Email Validation
   if (empty($_POST['email'])) {
     $error['email'] = "Enter your email";
@@ -36,7 +37,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       $error['email'] = "Enter a valid email";
     }
   }
-
   // Password Validation
   if (empty($_POST['password'])) {
     $error['password'] = "Enter your password";
@@ -47,16 +47,35 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   }
 
   if (empty($error)) {
-    if ($user->emailExists($email)) {
-      $error['email'] = "Email already exists";
-    } else {
-      if ($user->register($name, $email, $password)) {
-        $message = "Account created successfully";
-        $encodedMessage = urlencode($message);
-        header("Location: login.php?message=$encodedMessage");
+    if ($config['storage'] === 'file') {
+      if ($user->emailExists($email)) {
+        $error['email'] = "Email already exists";
+      } else {
+        if ($user->register($name, $email, $password)) {
+          $message = "Account created successfully";
+          $encodedMessage = urlencode($message);
+          header("Location: login.php?message=$encodedMessage");
+          exit();
+        } else {
+          $error['general'] = "Something went wrong. Please try again.";
+        }
+      }
+    } elseif ($config['storage'] === 'database' && isset($pdo)) {
+
+      $query = "INSERT INTO users (name, email, password) VALUES (:name, :email, :password)";
+
+      $stmt = $pdo->prepare($query);
+
+      $param = [
+        ':name' => $name,
+        ':email' => $email,
+        ':password' => $password
+      ];
+      if ($stmt->execute($param)) {
+        header("Location: login.php?message=Account created successfully");
         exit();
       } else {
-        $error['general'] = "Something went wrong. Please try again.";
+        $auth_error = "Something went wrong. Please try again.";
       }
     }
   }
@@ -104,6 +123,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <li><?php echo $err; ?></li>
               <?php endforeach; ?>
             </ul>
+          </div>
+        <?php endif; ?>
+        <?php if (isset($auth_error) && !empty($auth_error)) : ?>
+          <div class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
+            <?php echo $auth_error; ?>
           </div>
         <?php endif; ?>
         <?php if (isset($message) && !empty($message)) : ?>
