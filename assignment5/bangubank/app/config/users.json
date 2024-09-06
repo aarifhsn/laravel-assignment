@@ -1,0 +1,111 @@
+[
+    {
+        "id": 1,
+        "name": "Evangeline Duran",
+        "email": "bidy@mailinator.com",
+        "password": "123456",
+        "role": "customer",
+        "balance": "7794.00"
+    },
+    {
+        "id": 2,
+        "name": "Lane Daniel",
+        "email": "hidecusab@mailinator.com",
+        "password": "123456",
+        "role": "customer",
+        "balance": "0.00"
+    },
+    {
+        "id": 3,
+        "name": "Ray Campos",
+        "email": "bozu@mailinator.com",
+        "password": "123456",
+        "role": "customer",
+        "balance": "0.00"
+    },
+    {
+        "id": 4,
+        "name": "Minerva Fowler",
+        "email": "meforivi@mailinator.com",
+        "password": "123456",
+        "role": "customer",
+        "balance": "0.00"
+    },
+    {
+        "id": 5,
+        "name": "Latifah Rocha",
+        "email": "dyhemepimo@mailinator.com",
+        "password": "123456",
+        "role": "customer",
+        "balance": "2000.00"
+    },
+    {
+        "id": 6,
+        "name": "Tana Morgan",
+        "email": "jilegykip@mailinator.com",
+        "password": "123456",
+        "role": "customer",
+        "balance": "0.00"
+    },
+    {
+        "id": 7,
+        "name": "Marny Morton",
+        "email": "nofigufa@mailinator.com",
+        "password": "123456",
+        "role": "customer",
+        "balance": "0.00"
+    },
+    {
+        "id": 8,
+        "name": "Isabella Marks",
+        "email": "xoxeci@mailinator.com",
+        "password": "$2y$10$8MYkp5y.X4xegCi8\/x8efO5kxo7hLIsIdY6q1XtmHRy4CXeYifswS",
+        "role": "customer",
+        "balance": "343.00"
+    },
+    {
+        "id": 9,
+        "name": "Griffith Snow",
+        "email": "wosoqisixa@mailinator.com",
+        "password": "$2y$10$SuhiLGPBF9bUJj9cCfymgeCHLYydLuYzMiLom2ZIyh9yt1\/g\/LXR2",
+        "role": "customer",
+        "balance": "400.00"
+    },
+    {
+        "id": 10,
+        "name": "Wendy Stanley",
+        "email": "bile@mailinator.com",
+        "password": "$2y$10$2zFCEuYLpLcHX5hPj7LjqeqV3NTZMkCbPmDZrWk6KrwImjpLpovXK",
+        "role": "customer",
+        "balance": "2451.00"
+    },
+    {
+        "id": 11,
+        "name": "akash mehta",
+        "email": "akash@gmail.com",
+        "password": "$2y$10$nmP1vCU\/cR8KjQAAbyEnDu3YQY0k.DuASIOT1BmBweWaNUeclSfIa",
+        "role": "admin",
+        "balance": "0.00"
+    },
+    {
+        "id": 13,
+        "name": "akash mia",
+        "email": "akash2@gmail.com",
+        "password": "$2y$10$q8BcwEJrPkfNDaWyMpT6BONpBto6fFWAKAClVrVhJTikXENZB\/g.a",
+        "role": "admin",
+        "balance": "0.00"
+    },
+    {
+        "id": 14,
+        "name": "Mara Hartman",
+        "email": "fuhucoxuqu@mailinator.com",
+        "password": "$2y$10$TGAq3v\/eY2eA6pII1g2\/wuuH.mduUN\/aXjUbBiWOr3TzvRDig1TOe",
+        "role": "customer",
+        "balance": "0.00"
+    },
+    {
+        "name": "Marfi Ahmed",
+        "email": "aarifhsn@gmail.com",
+        "balance": 100
+    }
+]

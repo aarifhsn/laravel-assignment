@@ -3,6 +3,8 @@
 namespace Bangubank\Models;
 
 use Bangubank\Models\User;
+use PDO;
+use PDOException;
 
 class BalanceManager
 {
@@ -13,7 +15,28 @@ class BalanceManager
     public function __construct(User $user)
     {
         $this->user = $user;
-        $this->pdo = $this->user->isDatabaseStorage() ? $this->getPdo() : null;
+        $this->pdo = $this->user->isDatabaseStorage();
+    }
+
+    private function connectToDatabase()
+    {
+        $config = require __DIR__ . '/../../config.php';
+
+        if ($config['storage'] === 'database') {
+            try {
+                $pdo = new PDO(
+                    "mysql:host=" . $config['db']['host'] . ";dbname=" . $config['db']['database'],
+                    $config['db']['username'],
+                    $config['db']['password']
+                );
+                $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                return $pdo;
+            } catch (PDOException $e) {
+                error_log("Database connection error: " . $e->getMessage());
+                return null;
+            }
+        }
+        return null;
     }
     public function getPdo()
     {
@@ -31,7 +54,7 @@ class BalanceManager
 
     public function updateBalance($receiver_name, $email, $amount)
     {
-        if ($this->pdo) {
+        if ($this->pdo instanceof PDO) {
             // Database storage
             $stmt = $this->pdo->prepare("UPDATE transactions SET balance = balance + :amount WHERE email = :email");
             $stmt->execute(['amount' => $amount, 'email' => $email]);
@@ -40,7 +63,7 @@ class BalanceManager
                 return true;
             } else {
                 // If the user does not exist, insert them
-                $stmt = $this->pdo->prepare("INSERT INTO users (name, email, balance) VALUES (:name, :email, :balance)");
+                $stmt = $this->pdo->prepare("INSERT INTO transactions (name, email, balance) VALUES (:name, :email, :balance)");
                 return $stmt->execute(['name' => $receiver_name, 'email' => $email, 'balance' => $amount]);
             }
         } else {

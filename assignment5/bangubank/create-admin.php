@@ -6,10 +6,9 @@ use Bangubank\Models\AdminUser;
 
 // load configuration
 $config = require __DIR__ . '/app/config/config.php';
-$filePath = $config['filePath'];
 
 // Create the User object
-$admin_user = new AdminUser($filePath);
+$admin_user = new AdminUser($config['filePath'], $config['pdo'], $config['storageMethod']);
 
 // Prompt for admin details
 echo "Enter admin name: ";

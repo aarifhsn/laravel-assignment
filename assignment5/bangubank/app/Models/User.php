@@ -1,36 +1,24 @@
 <?php
 
 namespace Bangubank\Models;
+use PDO;
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 class User
 {
-    private $filePath;
+    public $filePath = '/../app/config/config.php';
     private $pdo;
 
-    public function __construct(array $config)
+    public function __construct($pdo = null, $filePath = null)
     {
-        if (empty($config['storage'])) {
-            throw new \InvalidArgumentException('Invalid configuration: storage type not set.');
+        if ($pdo && !($pdo instanceof PDO)) {
+            throw new \Exception("Expected a PDO instance, got " . gettype($pdo));
         }
-
-        if ($config['storage'] === 'file') {
-            if (isset($config['filePath'])) {
-                $this->filePath = $config['filePath'];
-            } else {
-                throw new \InvalidArgumentException('Invalid configuration: filePath not set.');
-            }
-            $this->pdo = null; // Disable PDO when using file storage
-        } elseif ($config['storage'] === 'database') {
-            $this->pdo = require __DIR__ . '/../config/db_setup.php';
-            $this->filePath = null; // Disable file storage when using database
-        } else {
-            throw new \InvalidArgumentException('Invalid configuration: unknown storage type.');
-        }
+        $this->pdo = $pdo;
+        $this->filePath = $filePath;
     }
-
 
     public function getFilePath()
     {
@@ -47,8 +35,7 @@ class User
 
     public function register($name, $email, $password)
     {
-
-        if ($this->pdo) {
+        if ($this->isDatabaseStorage()) {
             // Use database storage
             $query = "INSERT INTO users ( name, email, password, balance) VALUES ( :name, :email, :password, :balance)";
             $stmt = $this->pdo->prepare($query);
@@ -89,50 +76,59 @@ class User
 
     public function registeredByAdmin($fname, $lname, $email, $password)
     {
-        $users = $this->getAllUsers();
+        if ($this->isDatabaseStorage()) {
 
-        // Check if email already exists
-        if ($this->emailExists($email)) {
-            return false;
-        }
+            // Concatenate first and last name to form the full name
+            $fullName = trim($fname . ' ' . $lname);
 
-        // Generate a unique user ID
-        $userId = uniqid();
-
-        $user = [
-            'id' => $userId,
-            'fname' => $fname,
-            'lname' => $lname,
-            'email' => $email,
-            'password' => password_hash($password, PASSWORD_DEFAULT),
-            'balance' => 0
-        ];
-
-        if ($this->pdo) {
             // Database storage
-            $query = "INSERT INTO users (id, fname, lname, email, password, balance) VALUES (:id, :fname, :lname, :email, :password, :balance)";
+            $query = "INSERT INTO users (name, email, password, balance) VALUES (:name, :email, :password, :balance)";
             $stmt = $this->pdo->prepare($query);
+
             $params = [
-                ':id' => $userId,
-                ':fname' => $fname,
-                ':lname' => $lname,
+                ':name' => $fullName,
                 ':email' => $email,
                 ':password' => password_hash($password, PASSWORD_DEFAULT),
                 ':balance' => 0
             ];
+
             return $stmt->execute($params);
         } elseif ($this->filePath) {
             // File storage
-            $users[] = $user;
+            $users = $this->getAllUsers();
 
+            if ($this->emailExists($email)) {
+                return false;
+            }
+
+            $userId = uniqid();
+            $user = [
+                'id' => $userId,
+                'fname' => $fname,
+                'lname' => $lname,
+                'email' => $email,
+                'password' => password_hash($password, PASSWORD_DEFAULT),
+                'balance' => 0
+            ];
+
+            $users[] = $user;
             return file_put_contents($this->filePath, json_encode($users, JSON_PRETTY_PRINT));
         } else {
             throw new \RuntimeException('File storage is not configured.');
         }
     }
+
+    public function getLoggedInUserID()
+    {
+        $user = $this->getLoggedInUser();
+        if (isset($user['id'])) {
+            return $user['id'];
+        }
+        return null;
+    }
     public function getAllUsers()
     {
-        if ($this->pdo) {
+        if ($this->isDatabaseStorage()) {
             $stmt = $this->pdo->query("SELECT * FROM users");
             return $stmt->fetchAll();
         } elseif ($this->filePath) {
@@ -151,10 +147,10 @@ class User
 
         if ($this->pdo) {
             $stmt = $this->pdo->prepare("SELECT * FROM users WHERE email = :email");
-            $stmt->execute([':email' => $email]);
+            $stmt->execute(['email' => $email]);
             return $stmt->fetch();
         } elseif ($this->filePath) {
-            $users = $this->getAllUsers();
+            $users = $this->getAllUsers() ?? [];
             foreach ($users as $user) {
                 if ($user['email'] === $email) {
                     return $user;
@@ -169,7 +165,10 @@ class User
     public function getName()
     {
         $user = $this->getLoggedInUser();
-        return $user['name'] ?? $user['fname'] . ' ' . $user['lname'] ?? 'Guest';
+        if (isset($user['fname']) && isset($user['lname'])) {
+            return $user['fname'] . ' ' . $user['lname'];
+        }
+        return $user['name'] ?? 'Guest';
     }
 
     public function getEmail()
@@ -186,24 +185,24 @@ class User
         }
         return false;
     }
-
     public function login($email, $password)
     {
-        $users = $this->getUserByEmail($email);
-        foreach ($users as $user) {
-            if ($user['email'] === $email && password_verify($password, $user['password'])) {
-                $_SESSION['logged_in'] = true;
-                $_SESSION['email'] = $email;
-                $_SESSION['name'] = $user['name'];
-                return true;
-            }
+        $user = $this->getUserByEmail($email);
+        if ($user && password_verify($password, $user['password'])) {
+            $_SESSION['logged_in'] = true;
+            $_SESSION['role'] = $user['role'];
+            $_SESSION['email'] = $user['email'];
+            $_SESSION['name'] = $this->getName();
+
+            return true;
         }
+
         return false;
     }
 
     public function updateUser($updatedUser)
     {
-        if ($this->pdo) {
+        if ($this->isDatabaseStorage()) {
             $query = "UPDATE users SET name = :name, email = :email, password = :password, balance = :balance WHERE id = :id";
             $stmt = $this->pdo->prepare($query);
             $params = [
@@ -214,10 +213,12 @@ class User
                 ':id' => $updatedUser['id']
             ];
             return $stmt->execute($params);
+
+
         } elseif ($this->filePath) {
             $users = $this->getAllUsers();
             foreach ($users as &$user) {
-                if ($user['email'] === $updatedUser['email']) {
+                if ($user['id'] === $updatedUser['id']) {
                     $user = $updatedUser;
                     return file_put_contents($this->filePath, json_encode($users, JSON_PRETTY_PRINT)) !== false;
                 }

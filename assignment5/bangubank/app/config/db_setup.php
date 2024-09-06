@@ -1,48 +1,16 @@
 <?php
 
-$config = require __DIR__ . '/config.php';
+return [
+    'storage' => 'database', // Options: 'database', 'file'
+    
+    'db' => [
+        'host' => 'localhost',
+        'database' => 'bangubank',
+        'username' => 'root',
+        'password' => '',
+        'charset' => 'utf8mb4',
+    ],
 
-try {
-    // Include the username and password in the DSN
-    $dsn = "mysql:host={$config['db']['host']};dbname={$config['db']['database']}";
-    $pdo = new PDO($dsn, $config['db']['username'], $config['db']['password']);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-
-    // Create the database if it doesn't exist
-    $pdo->exec("CREATE DATABASE IF NOT EXISTS {$config['db']['database']}");
-    $pdo->exec("USE {$config['db']['database']}");
-
-    // Check if the tables exist by querying the information_schema
-    $stmt = $pdo->query("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = '{$config['db']['database']}' AND table_name = 'users'");
-    $tableExists = $stmt->fetchColumn();
-
-    if (!$tableExists) {
-
-        // Create tables if they don't exist
-        $pdo->exec("CREATE TABLE IF NOT EXISTS users (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        name VARCHAR(255) NOT NULL,
-        email VARCHAR(255) UNIQUE NOT NULL,
-        password VARCHAR(255) NOT NULL,
-        role VARCHAR(255) DEFAULT 'customer',
-        balance DECIMAL(10,2) DEFAULT 0
-    )");
-
-        // Create the transactions table if it doesn't exist
-        $pdo->exec("CREATE TABLE IF NOT EXISTS transactions (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        type VARCHAR(255) NOT NULL,
-        sender_email VARCHAR(255) NOT NULL,
-        receiver_name VARCHAR(255) NOT NULL,
-        receiver_email VARCHAR(255) NOT NULL,
-        amount DECIMAL(10, 2) NOT NULL,
-        date DATETIME NOT NULL
-    )");
-        echo "Database and tables set up successfully!";
-    }
-    return $pdo;
-} catch (PDOException $e) {
-    echo "Database error: " . $e->getMessage();
-    exit();
-}
+    'filePath' => __DIR__ . '/../../storage/users.json',
+    'transaction_FilePath' => __DIR__ . '/../../storage/transactions.json',
+];

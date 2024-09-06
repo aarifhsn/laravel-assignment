@@ -7,8 +7,6 @@
 - [Features](#features)
 - [Installation](#installation)
 - [Configuration](#configuration)
-- [Usage](#usage)
-- [Folder Structure](#folder-structure)
 
 ## Features
 
@@ -18,12 +16,15 @@
 
 ## Installation
 
+To set up this project locally, follow these steps:
+
 ### Prerequisites
 
 - PHP 7.4 or higher
 - Composer
 - MySQL (if using database storage)
 - Web Server (Apache, Nginx, etc.)
+- Must have permission to access all files as chown(basically for linux users)
 
 ### Steps
 
@@ -31,22 +32,41 @@
 
    ```bash
    git clone https://github.com/aarifhsn/laravel-assignment.git
-   cd laravel-assignment/bangubank
-
    ```
 
-2. **Install dependencies**:
+2. **Navigate to the project directory:**
+
+   ```bash
+   cd assignment5/bangubank
+   ```
+
+3. **Database Creation**
+
+   After installation the project, a database called bankofbangu and tables will be created automatically.
+
+4. **Install dependencies**:
 
    ```bash
    composer install
    ```
 
-3. **Create Admin**
+5. **Access the application:**
 
+   Open your browser and go to:
+
+   ```bash
+   http://localhost/your-directory/laravel-assignment/assignment5/bangubank
+   ```
+
+   check the directory where you installed the file.
+
+## Configuration
+
+- navigate to your-directory/laravel-assignment/assignment5/bangubank/app/config/config.php
+- Check the $storageMethod = 'database';
+- Update database to file, if you want to use file storage. default is database.
+
+6. **Create Admin**
    ```bash
    php create-admin.php
    ```
-
-4. **Update storage**
-
-   - Go to app/config/config.php to update the storage. Default is File
