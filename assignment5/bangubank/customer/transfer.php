@@ -13,7 +13,7 @@ use Bangubank\Models\BalanceManager;
 // Initialize User and AdminUser objects
 $user = new User($config['pdo']);
 
-$user->filePath = __DIR__ . '/../app/config/users.json';
+$user->filePath = __DIR__ . '/../storage/users.json';
 $balanceManager = new BalanceManager($user);
 $accountManagement = new AccountManagement($user, $pdo, $balanceManager);
 $transactionLogPath = __DIR__ . '/../storage/transactions.json';
